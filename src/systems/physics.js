@@ -249,7 +249,7 @@ function createPhysics(scene) {
   function updatePlayer(deltaTime, worldOctree, camera) {
     if (!playerCollider || !playerCollider.end) return;
 
-    let damping = Math.exp(-4 * deltaTime) - 1;
+    let damping = Math.exp(-10 * deltaTime) - 1;
 
     if (!playerOnFloor) {
       playerVelocity.y -= GRAVITY * deltaTime;

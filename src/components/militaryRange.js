@@ -787,108 +787,38 @@ export function createMilitaryRange(scene) {
     tank.rotation.y = rotY;
 
     // Tracks (Left & Right)
-    const trackGeo = new THREE.BoxGeometry(0.85, 0.9, 6.2);
+    const trackGeo = new THREE.BoxGeometry(0.8, 0.8, 6.0);
     const leftTrack = new THREE.Mesh(trackGeo, metalDark);
-    leftTrack.position.set(-1.6, 0.45, 0);
+    leftTrack.position.set(-1.6, 0.4, 0);
     leftTrack.castShadow = true;
-    leftTrack.receiveShadow = true;
     tank.add(leftTrack);
 
     const rightTrack = new THREE.Mesh(trackGeo, metalDark);
-    rightTrack.position.set(1.6, 0.45, 0);
+    rightTrack.position.set(1.6, 0.4, 0);
     rightTrack.castShadow = true;
-    rightTrack.receiveShadow = true;
     tank.add(rightTrack);
 
-    // Track wheels
-    const wheelGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.2, 12);
-    wheelGeo.rotateZ(Math.PI / 2);
-    for (let i = -2.2; i <= 2.2; i += 0.88) {
-      const wL = new THREE.Mesh(wheelGeo, tankArmorTrim);
-      wL.position.set(-2.05, 0.38, i);
-      tank.add(wL);
-      const wR = new THREE.Mesh(wheelGeo, tankArmorTrim);
-      wR.position.set(2.05, 0.38, i);
-      tank.add(wR);
-    }
+    // Main Hull (single box)
+    const hullGeo = new THREE.BoxGeometry(2.6, 0.8, 5.8);
+    const hull = new THREE.Mesh(hullGeo, tankArmorDark);
+    hull.position.set(0, 0.8, 0);
+    hull.castShadow = true;
+    tank.add(hull);
 
-    // Main Hull
-    const hullLowerGeo = new THREE.BoxGeometry(2.6, 0.8, 5.8);
-    const hullLower = new THREE.Mesh(hullLowerGeo, tankArmorDark);
-    hullLower.position.set(0, 0.75, 0);
-    hullLower.castShadow = true;
-    hullLower.receiveShadow = true;
-    tank.add(hullLower);
-
-    // Sloped upper front glacis plate
-    const glacisGeo = new THREE.BoxGeometry(2.58, 0.65, 1.8);
-    const glacis = new THREE.Mesh(glacisGeo, tankArmorDark);
-    glacis.position.set(0, 1.2, 2.0);
-    glacis.rotation.x = -Math.PI * 0.18;
-    glacis.castShadow = true;
-    tank.add(glacis);
-
-    // Main hull top plate
-    const hullTopGeo = new THREE.BoxGeometry(2.58, 0.4, 3.8);
-    const hullTop = new THREE.Mesh(hullTopGeo, tankArmorDark);
-    hullTop.position.set(0, 1.25, -0.6);
-    hullTop.castShadow = true;
-    tank.add(hullTop);
-
-    // Turret
-    const turretGeo = new THREE.BoxGeometry(2.0, 0.85, 2.4);
+    // Turret (single box)
+    const turretGeo = new THREE.BoxGeometry(1.8, 0.8, 2.4);
     const turret = new THREE.Mesh(turretGeo, tankArmorDark);
-    turret.position.set(0, 1.85, -0.2);
+    turret.position.set(0, 1.6, -0.4);
     turret.castShadow = true;
-    turret.receiveShadow = true;
     tank.add(turret);
 
-    // Commander's Cupola & Hatch
-    const cupolaGeo = new THREE.CylinderGeometry(0.38, 0.42, 0.28, 12);
-    const cupola = new THREE.Mesh(cupolaGeo, tankArmorTrim);
-    cupola.position.set(-0.5, 2.35, -0.4);
-    cupola.castShadow = true;
-    tank.add(cupola);
-
-    // Radio Antenna
-    const antGeo = new THREE.CylinderGeometry(0.02, 0.03, 2.4, 6);
-    const ant = new THREE.Mesh(antGeo, metalDark);
-    ant.position.set(0.65, 3.2, -0.8);
-    ant.rotation.z = -0.08;
-    tank.add(ant);
-
-    // Main Cannon Gun & Mantlet
-    const mantletGeo = new THREE.BoxGeometry(0.9, 0.6, 0.6);
-    const mantlet = new THREE.Mesh(mantletGeo, tankArmorTrim);
-    mantlet.position.set(0, 1.85, 1.2);
-    mantlet.castShadow = true;
-    tank.add(mantlet);
-
-    // Long barrel
-    const barrelGeo = new THREE.CylinderGeometry(0.12, 0.15, 4.4, 12);
+    // Barrel (cylinder sticking out front of turret)
+    const barrelGeo = new THREE.CylinderGeometry(0.15, 0.15, 4.0, 8);
     barrelGeo.rotateX(Math.PI / 2);
     const barrel = new THREE.Mesh(barrelGeo, metalDark);
-    barrel.position.set(0, 1.85, 3.6);
+    barrel.position.set(0, 1.6, 2.6);
     barrel.castShadow = true;
     tank.add(barrel);
-
-    // Muzzle brake
-    const muzzleGeo = new THREE.CylinderGeometry(0.2, 0.2, 0.5, 12);
-    muzzleGeo.rotateX(Math.PI / 2);
-    const muzzle = new THREE.Mesh(muzzleGeo, tankArmorTrim);
-    muzzle.position.set(0, 1.85, 5.85);
-    muzzle.castShadow = true;
-    tank.add(muzzle);
-
-    // Rear external fuel tanks
-    const fuelGeo = new THREE.CylinderGeometry(0.3, 0.3, 1.0, 12);
-    fuelGeo.rotateZ(Math.PI / 2);
-    const extFuel1 = new THREE.Mesh(fuelGeo, redBarrelMaterial);
-    extFuel1.position.set(-0.75, 1.35, -2.85);
-    tank.add(extFuel1);
-    const extFuel2 = new THREE.Mesh(fuelGeo, redBarrelMaterial);
-    extFuel2.position.set(0.75, 1.35, -2.85);
-    tank.add(extFuel2);
 
     return tank;
   }
@@ -978,104 +908,39 @@ export function createMilitaryRange(scene) {
     bmp.position.set(x, y, z);
     bmp.rotation.y = rotY;
 
-    // Tracks & rubber skirts
-    const trackGeo = new THREE.BoxGeometry(0.65, 0.65, 5.6);
+    // Tracks
+    const trackGeo = new THREE.BoxGeometry(0.6, 0.6, 5.2);
     const leftTrack = new THREE.Mesh(trackGeo, metalDark);
-    leftTrack.position.set(-1.45, 0.35, 0);
+    leftTrack.position.set(-1.4, 0.3, 0);
     leftTrack.castShadow = true;
     bmp.add(leftTrack);
 
     const rightTrack = new THREE.Mesh(trackGeo, metalDark);
-    rightTrack.position.set(1.45, 0.35, 0);
+    rightTrack.position.set(1.4, 0.3, 0);
     rightTrack.castShadow = true;
     bmp.add(rightTrack);
 
-    // Road wheels (6 per side)
-    const wheelGeo = new THREE.CylinderGeometry(0.3, 0.3, 0.16, 12);
-    wheelGeo.rotateZ(Math.PI / 2);
-    for (let i = -2.0; i <= 2.0; i += 0.8) {
-      const wL = new THREE.Mesh(wheelGeo, tankArmorTrim);
-      wL.position.set(-1.8, 0.32, i);
-      bmp.add(wL);
-      const wR = new THREE.Mesh(wheelGeo, tankArmorTrim);
-      wR.position.set(1.8, 0.32, i);
-      bmp.add(wR);
-    }
+    // Hull
+    const hullGeo = new THREE.BoxGeometry(2.4, 0.7, 5.4);
+    const hull = new THREE.Mesh(hullGeo, tankArmorDark);
+    hull.position.set(0, 0.65, 0);
+    hull.castShadow = true;
+    bmp.add(hull);
 
-    // Lower hull
-    const hullLowerGeo = new THREE.BoxGeometry(2.35, 0.65, 5.2);
-    const hullLower = new THREE.Mesh(hullLowerGeo, tankArmorDark);
-    hullLower.position.set(0, 0.6, 0);
-    hullLower.castShadow = true;
-    bmp.add(hullLower);
-
-    // Front sloped wedge / glacis
-    const glacisGeo = new THREE.BoxGeometry(2.34, 0.45, 2.0);
-    const glacis = new THREE.Mesh(glacisGeo, tankArmorDark);
-    glacis.position.set(0, 0.95, 1.8);
-    glacis.rotation.x = -Math.PI * 0.22;
-    glacis.castShadow = true;
-    bmp.add(glacis);
-
-    // Wave deflector plate on glacis
-    const wavePlateGeo = new THREE.BoxGeometry(2.1, 0.08, 1.1);
-    const wavePlate = new THREE.Mesh(wavePlateGeo, tankArmorTrim);
-    wavePlate.position.set(0, 1.12, 1.9);
-    wavePlate.rotation.x = -Math.PI * 0.22;
-    bmp.add(wavePlate);
-
-    // Upper troop & engine deck
-    const deckGeo = new THREE.BoxGeometry(2.34, 0.35, 3.4);
-    const deck = new THREE.Mesh(deckGeo, tankArmorDark);
-    deck.position.set(0, 1.05, -0.7);
-    deck.castShadow = true;
-    bmp.add(deck);
-
-    // Conical BMP-2 Turret
-    const turretGeo = new THREE.CylinderGeometry(0.85, 1.1, 0.65, 14);
+    // Turret
+    const turretGeo = new THREE.BoxGeometry(1.2, 0.6, 1.6);
     const turret = new THREE.Mesh(turretGeo, tankArmorDark);
-    turret.position.set(0, 1.5, 0.1);
+    turret.position.set(0, 1.3, 0.2);
     turret.castShadow = true;
     bmp.add(turret);
 
-    // 30mm 2A42 Autocannon
-    const cannonMantlet = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.4, 0.5), tankArmorTrim);
-    cannonMantlet.position.set(0, 1.55, 0.8);
-    bmp.add(cannonMantlet);
-
-    const cannonBarrelGeo = new THREE.CylinderGeometry(0.045, 0.055, 3.4, 10);
-    cannonBarrelGeo.rotateX(Math.PI / 2);
-    const cannon = new THREE.Mesh(cannonBarrelGeo, metalDark);
-    cannon.position.set(0, 1.58, 2.4);
-    cannon.castShadow = true;
-    bmp.add(cannon);
-
-    // Slotted muzzle brake
-    const bmpMuzzle = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.35, 10), tankArmorTrim);
-    bmpMuzzle.rotateX(Math.PI / 2);
-    bmpMuzzle.position.set(0, 1.58, 4.15);
-    bmp.add(bmpMuzzle);
-
-    // ATGM "Konkurs" launcher tube on turret top
-    const atgmTubeGeo = new THREE.CylinderGeometry(0.09, 0.09, 1.3, 10);
-    atgmTubeGeo.rotateX(Math.PI / 2);
-    const atgmTube = new THREE.Mesh(atgmTubeGeo, tankArmorTrim);
-    atgmTube.position.set(0, 2.0, 0.1);
-    atgmTube.castShadow = true;
-    bmp.add(atgmTube);
-
-    // Rear troop doors
-    for (const dx of [-0.55, 0.55]) {
-      const door = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.65, 0.05), tankArmorTrim);
-      door.position.set(dx, 0.75, -2.62);
-      bmp.add(door);
-    }
-
-    // Radio antenna
-    const ant = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.025, 2.2, 6), metalDark);
-    ant.position.set(0.65, 2.5, -0.3);
-    ant.rotation.z = -0.06;
-    bmp.add(ant);
+    // Barrel
+    const barrelGeo = new THREE.CylinderGeometry(0.08, 0.08, 2.5, 8);
+    barrelGeo.rotateX(Math.PI / 2);
+    const barrel = new THREE.Mesh(barrelGeo, metalDark);
+    barrel.position.set(0, 1.3, 2.0);
+    barrel.castShadow = true;
+    bmp.add(barrel);
 
     return bmp;
   }
@@ -1088,116 +953,47 @@ export function createMilitaryRange(scene) {
     arty.position.set(x, y, z);
     arty.rotation.y = rotY;
 
-    // Heavy tracked chassis
-    const trackGeo = new THREE.BoxGeometry(0.95, 0.95, 6.8);
+    // Tracks
+    const trackGeo = new THREE.BoxGeometry(0.9, 0.9, 6.4);
     const leftTrack = new THREE.Mesh(trackGeo, metalDark);
-    leftTrack.position.set(-1.75, 0.48, 0);
+    leftTrack.position.set(-1.7, 0.45, 0);
     leftTrack.castShadow = true;
     arty.add(leftTrack);
 
     const rightTrack = new THREE.Mesh(trackGeo, metalDark);
-    rightTrack.position.set(1.75, 0.48, 0);
+    rightTrack.position.set(1.7, 0.45, 0);
     rightTrack.castShadow = true;
     arty.add(rightTrack);
 
-    // Road wheels
-    const wheelGeo = new THREE.CylinderGeometry(0.4, 0.4, 0.22, 14);
-    wheelGeo.rotateZ(Math.PI / 2);
-    for (let i = -2.6; i <= 2.6; i += 0.88) {
-      const wL = new THREE.Mesh(wheelGeo, tankArmorTrim);
-      wL.position.set(-2.25, 0.45, i);
-      arty.add(wL);
-      const wR = new THREE.Mesh(wheelGeo, tankArmorTrim);
-      wR.position.set(2.25, 0.45, i);
-      arty.add(wR);
-    }
+    // Hull
+    const hullGeo = new THREE.BoxGeometry(2.8, 0.9, 6.6);
+    const hull = new THREE.Mesh(hullGeo, tankArmorDark);
+    hull.position.set(0, 0.9, 0);
+    hull.castShadow = true;
+    arty.add(hull);
 
-    // Lower hull
-    const hullLowerGeo = new THREE.BoxGeometry(2.7, 0.85, 6.4);
-    const hullLower = new THREE.Mesh(hullLowerGeo, tankArmorDark);
-    hullLower.position.set(0, 0.8, 0);
-    hullLower.castShadow = true;
-    arty.add(hullLower);
-
-    // Sloped front glacis
-    const glacisGeo = new THREE.BoxGeometry(2.68, 0.65, 2.0);
-    const glacis = new THREE.Mesh(glacisGeo, tankArmorDark);
-    glacis.position.set(0, 1.25, 2.2);
-    glacis.rotation.x = -Math.PI * 0.18;
-    arty.add(glacis);
-
-    // Upper hull plate
-    const hullTopGeo = new THREE.BoxGeometry(2.68, 0.45, 4.4);
-    const hullTop = new THREE.Mesh(hullTopGeo, tankArmorDark);
-    hullTop.position.set(0, 1.35, -0.6);
-    arty.add(hullTop);
-
-    // Massive Boxy Artillery Turret
-    const turretGeo = new THREE.BoxGeometry(2.5, 1.4, 3.8);
+    // Huge Turret
+    const turretGeo = new THREE.BoxGeometry(2.2, 1.2, 3.0);
     const turret = new THREE.Mesh(turretGeo, tankArmorDark);
-    turret.position.set(0, 2.15, -0.2);
+    turret.position.set(0, 1.95, -0.6);
     turret.castShadow = true;
     arty.add(turret);
 
-    // Turret rear bustle
-    const bustleGeo = new THREE.BoxGeometry(2.2, 1.0, 1.4);
-    const bustle = new THREE.Mesh(bustleGeo, tankArmorTrim);
-    bustle.position.set(0, 2.1, -2.4);
-    bustle.castShadow = true;
-    arty.add(bustle);
-
-    // Gun Cradle & Mantlet
-    const cradle = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.9, 0.9), tankArmorTrim);
-    cradle.position.set(0, 2.15, 1.8);
-    cradle.castShadow = true;
-    arty.add(cradle);
-
-    // Massive 152mm Gun (Elevated ~25 degrees towards sky)
-    const gunAssembly = new THREE.Group();
-    gunAssembly.position.set(0, 2.15, 2.1);
-    gunAssembly.rotation.x = -Math.PI * 0.14; // ~25 deg elevation!
-
-    // Main barrel tube (6.8m long)
-    const barrelGeo = new THREE.CylinderGeometry(0.18, 0.24, 6.8, 14);
+    // Massive Barrel elevated
+    const barrelGeo = new THREE.CylinderGeometry(0.2, 0.2, 5.0, 8);
     barrelGeo.rotateX(Math.PI / 2);
     const barrel = new THREE.Mesh(barrelGeo, metalDark);
-    barrel.position.set(0, 0, 3.4);
+    
+    // Elevate barrel by grouping it and rotating
+    const gunGroup = new THREE.Group();
+    gunGroup.position.set(0, 1.95, 0.9);
+    gunGroup.rotation.x = -Math.PI * 0.15; // Point up
+    
+    barrel.position.set(0, 0, 2.5);
     barrel.castShadow = true;
-    gunAssembly.add(barrel);
-
-    // Fume extractor sleeve cylinder midway along barrel
-    const fumeGeo = new THREE.CylinderGeometry(0.3, 0.3, 1.2, 14);
-    fumeGeo.rotateX(Math.PI / 2);
-    const fume = new THREE.Mesh(fumeGeo, tankArmorTrim);
-    fume.position.set(0, 0, 3.2);
-    gunAssembly.add(fume);
-
-    // Massive Double-Baffle Muzzle Brake at tip
-    const brakeGeo = new THREE.BoxGeometry(0.55, 0.45, 0.85);
-    const brake = new THREE.Mesh(brakeGeo, tankArmorTrim);
-    brake.position.set(0, 0, 6.85);
-    brake.castShadow = true;
-    gunAssembly.add(brake);
-
-    arty.add(gunAssembly);
-
-    // Commander Cupola with 12.7mm Machine Gun
-    const cupola = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.45, 0.3, 12), tankArmorTrim);
-    cupola.position.set(-0.65, 2.95, -0.4);
-    arty.add(cupola);
-
-    const mgBarrel = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.03, 1.2, 8), metalDark);
-    mgBarrel.rotateX(Math.PI / 2);
-    mgBarrel.position.set(-0.65, 3.2, 0.2);
-    arty.add(mgBarrel);
-
-    // External fuel drums at rear
-    for (const dx of [-0.85, 0.85]) {
-      const drum = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.32, 0.9, 12), greenBarrelMaterial);
-      drum.rotateZ(Math.PI / 2);
-      drum.position.set(dx, 1.5, -3.4);
-      arty.add(drum);
-    }
+    gunGroup.add(barrel);
+    
+    arty.add(gunGroup);
 
     return arty;
   }

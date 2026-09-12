@@ -90,42 +90,52 @@ function playBotReload() {
   }
 }
 
-// Procedural 3D Soldier Mesh (0 KB extra assets)
+function createFaceTexture() {
+  const canvas = document.createElement("canvas");
+  canvas.width = 64;
+  canvas.height = 64;
+  const ctx = canvas.getContext("2d");
+
+  // Base skin
+  ctx.fillStyle = "#c89874";
+  ctx.fillRect(0, 0, 64, 64);
+
+  // Eyes (pixelated)
+  ctx.fillStyle = "#111";
+  ctx.fillRect(12, 24, 12, 12); // left eye
+  ctx.fillRect(40, 24, 12, 12); // right eye
+
+  // Nose
+  ctx.fillStyle = "#a67b5b";
+  ctx.fillRect(26, 36, 12, 8);
+
+  // Tense mouth
+  ctx.fillStyle = "#332211";
+  ctx.fillRect(20, 50, 24, 6);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.magFilter = THREE.NearestFilter;
+  texture.minFilter = THREE.NearestFilter;
+  return texture;
+}
+
+// Procedural 3D Soldier Mesh (Blocky Minecraft style)
 function createSoldierMesh() {
   const soldier = new THREE.Group();
 
-  const camoUniformMat = new THREE.MeshStandardMaterial({
+  const camoMat = new THREE.MeshStandardMaterial({
     color: 0x485139, // Tactical military olive drab
-    roughness: 0.8,
-    metalness: 0.1,
-  });
-
-  const vestMat = new THREE.MeshStandardMaterial({
-    color: 0x2e3422, // Dark tactical vest
-    roughness: 0.7,
-    metalness: 0.2,
-  });
-
-  const helmetMat = new THREE.MeshStandardMaterial({
-    color: 0x363d28, // Kevlar helmet
-    roughness: 0.6,
-    metalness: 0.2,
+    roughness: 0.9,
   });
 
   const skinMat = new THREE.MeshStandardMaterial({
     color: 0xc89874, // Skin
-    roughness: 0.7,
-  });
-
-  const bootMat = new THREE.MeshStandardMaterial({
-    color: 0x161616, // Black combat boots
-    roughness: 0.85,
+    roughness: 0.8,
   });
 
   const gunMat = new THREE.MeshStandardMaterial({
     color: 0x1b1b1e, // Gunmetal black
-    metalness: 0.85,
-    roughness: 0.25,
+    roughness: 0.4,
   });
 
   const flashMat = new THREE.MeshBasicMaterial({
@@ -134,168 +144,87 @@ function createSoldierMesh() {
     opacity: 0,
   });
 
-  // 1. Legs & Boots (combat firing stance)
-  for (const lx of [-0.18, 0.18]) {
-    const legGeo = new THREE.BoxGeometry(0.18, 0.76, 0.2);
-    const leg = new THREE.Mesh(legGeo, camoUniformMat);
-    leg.position.set(lx, 0.44, lx > 0 ? 0.06 : -0.06);
+  const faceMat = new THREE.MeshStandardMaterial({
+    map: createFaceTexture(),
+    roughness: 0.8,
+  });
+
+  // BoxGeometry materials: right, left, top, bottom, front (+Z), back (-Z)
+  const headMaterials = [
+    skinMat, skinMat, skinMat, skinMat, faceMat, skinMat
+  ];
+
+  // 1. Legs
+  const legGeo = new THREE.BoxGeometry(0.18, 0.7, 0.18);
+  for (const lx of [-0.1, 0.1]) {
+    const leg = new THREE.Mesh(legGeo, camoMat);
+    leg.position.set(lx, 0.35, 0);
     leg.castShadow = true;
     soldier.add(leg);
-
-    const bootGeo = new THREE.BoxGeometry(0.19, 0.14, 0.26);
-    const boot = new THREE.Mesh(bootGeo, bootMat);
-    boot.position.set(lx, 0.07, lx > 0 ? 0.09 : -0.03);
-    boot.castShadow = true;
-    soldier.add(boot);
   }
 
-  // 2. Torso & Body Armor
-  const pelvis = new THREE.Mesh(
-    new THREE.BoxGeometry(0.44, 0.2, 0.24),
-    camoUniformMat
+  // 2. Torso
+  const torso = new THREE.Mesh(
+    new THREE.BoxGeometry(0.4, 0.7, 0.2),
+    camoMat
   );
-  pelvis.position.y = 0.88;
-  soldier.add(pelvis);
+  torso.position.y = 1.05;
+  torso.castShadow = true;
+  soldier.add(torso);
 
-  const chest = new THREE.Mesh(
-    new THREE.BoxGeometry(0.48, 0.42, 0.28),
-    camoUniformMat
-  );
-  chest.position.y = 1.15;
-  chest.castShadow = true;
-  soldier.add(chest);
-
-  const vest = new THREE.Mesh(
-    new THREE.BoxGeometry(0.5, 0.36, 0.32),
-    vestMat
-  );
-  vest.position.y = 1.15;
-  vest.castShadow = true;
-  soldier.add(vest);
-
-  // Mag pouches on vest front
-  for (let p = -0.14; p <= 0.14; p += 0.14) {
-    const pouch = new THREE.Mesh(
-      new THREE.BoxGeometry(0.1, 0.16, 0.08),
-      vestMat
-    );
-    pouch.position.set(p, 1.08, 0.18);
-    soldier.add(pouch);
-  }
-
-  // 3. Head & Helmet
+  // 3. Head
   const headGroup = new THREE.Group();
-  headGroup.position.set(0, 1.44, 0);
-
-  const neck = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.09, 0.1, 0.1, 8),
-    skinMat
-  );
-  neck.position.y = -0.04;
-  headGroup.add(neck);
+  headGroup.position.set(0, 1.55, 0);
 
   const head = new THREE.Mesh(
-    new THREE.BoxGeometry(0.2, 0.22, 0.22),
-    skinMat
+    new THREE.BoxGeometry(0.3, 0.3, 0.3),
+    headMaterials
   );
-  head.position.y = 0.08;
   head.castShadow = true;
   headGroup.add(head);
-
-  // Balaclava mask
-  const mask = new THREE.Mesh(
-    new THREE.BoxGeometry(0.205, 0.12, 0.225),
-    vestMat
-  );
-  mask.position.set(0, 0.04, 0.01);
-  headGroup.add(mask);
-
-  // Helmet
-  const helmet = new THREE.Mesh(
-    new THREE.SphereGeometry(0.15, 12, 10, 0, Math.PI * 2, 0, Math.PI * 0.58),
-    helmetMat
-  );
-  helmet.position.set(0, 0.15, 0);
-  helmet.castShadow = true;
-  headGroup.add(helmet);
-
   soldier.add(headGroup);
 
-  // 4. Arms & Assault Rifle (Pivoting weapon assembly)
+  // 4. Arms & Weapon (Pivoting weapon assembly pointing to +Z)
   const weaponAssembly = new THREE.Group();
-  weaponAssembly.position.set(0.12, 1.25, 0.08);
+  weaponAssembly.position.set(0, 1.25, 0.15);
 
   // Right arm (trigger grip)
   const rArm = new THREE.Mesh(
-    new THREE.BoxGeometry(0.12, 0.35, 0.12),
-    camoUniformMat
+    new THREE.BoxGeometry(0.15, 0.6, 0.15),
+    camoMat
   );
-  rArm.position.set(0.1, -0.08, 0.05);
-  rArm.rotation.x = -Math.PI * 0.35;
-  rArm.rotation.z = -0.15;
+  rArm.position.set(0.25, -0.15, 0.1);
+  rArm.rotation.x = -Math.PI / 2.5; 
   weaponAssembly.add(rArm);
 
   // Left arm (handguard support)
   const lArm = new THREE.Mesh(
-    new THREE.BoxGeometry(0.12, 0.42, 0.12),
-    camoUniformMat
+    new THREE.BoxGeometry(0.15, 0.6, 0.15),
+    camoMat
   );
-  lArm.position.set(-0.28, -0.05, 0.22);
-  lArm.rotation.x = -Math.PI * 0.28;
-  lArm.rotation.y = Math.PI * 0.32;
+  lArm.position.set(-0.25, -0.05, 0.2);
+  lArm.rotation.x = -Math.PI / 2.2;
+  lArm.rotation.y = Math.PI / 6;
   weaponAssembly.add(lArm);
 
   // Rifle
-  const rifle = new THREE.Group();
-  rifle.position.set(-0.08, 0.02, 0.28);
-
-  const receiver = new THREE.Mesh(
-    new THREE.BoxGeometry(0.07, 0.11, 0.55),
+  const rifle = new THREE.Mesh(
+    new THREE.BoxGeometry(0.06, 0.15, 0.8),
     gunMat
   );
-  receiver.castShadow = true;
-  rifle.add(receiver);
-
-  const stock = new THREE.Mesh(
-    new THREE.BoxGeometry(0.06, 0.1, 0.28),
-    gunMat
-  );
-  stock.position.set(0, -0.02, -0.38);
-  rifle.add(stock);
-
-  const barrel = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.016, 0.018, 0.42, 8),
-    gunMat
-  );
-  barrel.rotateX(Math.PI / 2);
-  barrel.position.set(0, 0.02, 0.45);
-  rifle.add(barrel);
-
-  const muzzle = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.024, 0.024, 0.08, 8),
-    gunMat
-  );
-  muzzle.rotateX(Math.PI / 2);
-  muzzle.position.set(0, 0.02, 0.68);
-  rifle.add(muzzle);
-
-  const mag = new THREE.Mesh(
-    new THREE.BoxGeometry(0.05, 0.22, 0.11),
-    gunMat
-  );
-  mag.position.set(0, -0.14, 0.08);
-  mag.rotation.x = 0.25;
-  rifle.add(mag);
+  rifle.position.set(0.1, 0, 0.4);
+  rifle.castShadow = true;
+  weaponAssembly.add(rifle);
 
   // Muzzle flash
-  const flashGeo = new THREE.ConeGeometry(0.08, 0.25, 6);
-  flashGeo.rotateX(-Math.PI / 2);
-  const flash = new THREE.Mesh(flashGeo, flashMat);
-  flash.position.set(0, 0.02, 0.82);
+  const flash = new THREE.Mesh(
+    new THREE.BoxGeometry(0.15, 0.15, 0.15),
+    flashMat
+  );
+  flash.position.set(0.1, 0, 0.85);
   flash.visible = false;
-  rifle.add(flash);
+  weaponAssembly.add(flash);
 
-  weaponAssembly.add(rifle);
   soldier.add(weaponAssembly);
 
   return {
@@ -353,7 +282,8 @@ export function createSoldierBots(scene) {
 
     // Aim soldier toward target (targets are at negative Z)
     const aimDir = new THREE.Vector3().subVectors(cfg.targetPos, cfg.pos).normalize();
-    const yaw = Math.atan2(aimDir.x, -aimDir.z); // Facing negative Z
+    // atan2(x, z) makes +Z forward.
+    const yaw = Math.atan2(aimDir.x, aimDir.z); 
     soldierObj.root.rotation.y = yaw;
 
     // Slight pitch of weapon assembly
@@ -417,7 +347,7 @@ export function createSoldierBots(scene) {
       // Smooth recoil recovery
       if (bot.recoilOffset > 0) {
         bot.recoilOffset = Math.max(0, bot.recoilOffset - deltaTime * 0.35);
-        bot.soldier.weaponAssembly.position.z = 0.08 - bot.recoilOffset;
+        bot.soldier.weaponAssembly.position.z = 0.15 - bot.recoilOffset;
       }
 
       // Reload state
@@ -458,7 +388,7 @@ export function createSoldierBots(scene) {
 
         // Visual shot effect: recoil + muzzle flash
         bot.recoilOffset = 0.05;
-        bot.soldier.weaponAssembly.position.z = 0.08 - bot.recoilOffset;
+        bot.soldier.weaponAssembly.position.z = 0.15 - bot.recoilOffset;
         bot.soldier.flash.visible = true;
         bot.soldier.flash.material.opacity = 1.0;
         bot.flashTimer = 0.06;
