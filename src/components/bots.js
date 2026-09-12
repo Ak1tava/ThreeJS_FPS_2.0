@@ -186,44 +186,115 @@ function createSoldierMesh() {
 
   // 4. Arms & Weapon (Pivoting weapon assembly pointing to +Z)
   const weaponAssembly = new THREE.Group();
-  weaponAssembly.position.set(0, 1.25, 0.15);
+  weaponAssembly.position.set(0, 1.1, 0.12);
 
-  // Right arm (trigger grip)
-  const rArm = new THREE.Mesh(
-    new THREE.BoxGeometry(0.15, 0.6, 0.15),
-    camoMat
-  );
-  rArm.position.set(0.25, -0.15, 0.1);
-  rArm.rotation.x = -Math.PI / 2.5; 
-  weaponAssembly.add(rArm);
+  // Rifle group (receiver + stock + barrel + magazine)
+  const rifleGroup = new THREE.Group();
+  rifleGroup.position.set(0, 0.05, 0.15);
 
-  // Left arm (handguard support)
-  const lArm = new THREE.Mesh(
-    new THREE.BoxGeometry(0.15, 0.6, 0.15),
-    camoMat
-  );
-  lArm.position.set(-0.25, -0.05, 0.2);
-  lArm.rotation.x = -Math.PI / 2.2;
-  lArm.rotation.y = Math.PI / 6;
-  weaponAssembly.add(lArm);
-
-  // Rifle
-  const rifle = new THREE.Mesh(
-    new THREE.BoxGeometry(0.06, 0.15, 0.8),
+  // Receiver body
+  const receiver = new THREE.Mesh(
+    new THREE.BoxGeometry(0.08, 0.12, 0.5),
     gunMat
   );
-  rifle.position.set(0.1, 0, 0.4);
-  rifle.castShadow = true;
-  weaponAssembly.add(rifle);
+  receiver.castShadow = true;
+  rifleGroup.add(receiver);
+
+  // Stock (behind receiver)
+  const stock = new THREE.Mesh(
+    new THREE.BoxGeometry(0.07, 0.1, 0.3),
+    gunMat
+  );
+  stock.position.set(0, -0.01, -0.38);
+  rifleGroup.add(stock);
+
+  // Barrel (in front of receiver)
+  const barrel = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.02, 0.025, 0.45, 8),
+    gunMat
+  );
+  barrel.rotation.x = Math.PI / 2;
+  barrel.position.set(0, 0.02, 0.47);
+  barrel.castShadow = true;
+  rifleGroup.add(barrel);
+
+  // Muzzle tip
+  const muzzle = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.03, 0.03, 0.06, 8),
+    gunMat
+  );
+  muzzle.rotation.x = Math.PI / 2;
+  muzzle.position.set(0, 0.02, 0.72);
+  rifleGroup.add(muzzle);
+
+  // Magazine (curved box under receiver)
+  const mag = new THREE.Mesh(
+    new THREE.BoxGeometry(0.06, 0.2, 0.1),
+    gunMat
+  );
+  mag.position.set(0, -0.15, 0.06);
+  mag.rotation.x = 0.2;
+  rifleGroup.add(mag);
+
+  weaponAssembly.add(rifleGroup);
+
+  // Right arm (trigger grip) — upper arm + forearm
+  const rUpperArm = new THREE.Mesh(
+    new THREE.BoxGeometry(0.14, 0.35, 0.14),
+    camoMat
+  );
+  rUpperArm.position.set(0.24, -0.08, -0.05);
+  weaponAssembly.add(rUpperArm);
+
+  const rForearm = new THREE.Mesh(
+    new THREE.BoxGeometry(0.13, 0.3, 0.13),
+    camoMat
+  );
+  rForearm.position.set(0.24, -0.12, 0.12);
+  rForearm.rotation.x = -Math.PI / 3;
+  weaponAssembly.add(rForearm);
+
+  // Right hand on pistol grip
+  const rHand = new THREE.Mesh(
+    new THREE.BoxGeometry(0.1, 0.1, 0.1),
+    skinMat
+  );
+  rHand.position.set(0.0, -0.08, 0.0);
+  rifleGroup.add(rHand);
+
+  // Left arm (handguard support)
+  const lUpperArm = new THREE.Mesh(
+    new THREE.BoxGeometry(0.14, 0.35, 0.14),
+    camoMat
+  );
+  lUpperArm.position.set(-0.24, -0.08, -0.05);
+  weaponAssembly.add(lUpperArm);
+
+  const lForearm = new THREE.Mesh(
+    new THREE.BoxGeometry(0.13, 0.3, 0.13),
+    camoMat
+  );
+  lForearm.position.set(-0.24, -0.15, 0.18);
+  lForearm.rotation.x = -Math.PI / 2.8;
+  lForearm.rotation.y = Math.PI / 8;
+  weaponAssembly.add(lForearm);
+
+  // Left hand on handguard
+  const lHand = new THREE.Mesh(
+    new THREE.BoxGeometry(0.1, 0.1, 0.1),
+    skinMat
+  );
+  lHand.position.set(0.0, 0.02, 0.3);
+  rifleGroup.add(lHand);
 
   // Muzzle flash
   const flash = new THREE.Mesh(
     new THREE.BoxGeometry(0.15, 0.15, 0.15),
     flashMat
   );
-  flash.position.set(0.1, 0, 0.85);
+  flash.position.set(0, 0.02, 0.8);
   flash.visible = false;
-  weaponAssembly.add(flash);
+  rifleGroup.add(flash);
 
   soldier.add(weaponAssembly);
 
@@ -347,7 +418,7 @@ export function createSoldierBots(scene) {
       // Smooth recoil recovery
       if (bot.recoilOffset > 0) {
         bot.recoilOffset = Math.max(0, bot.recoilOffset - deltaTime * 0.35);
-        bot.soldier.weaponAssembly.position.z = 0.15 - bot.recoilOffset;
+        bot.soldier.weaponAssembly.position.z = 0.12 - bot.recoilOffset;
       }
 
       // Reload state
@@ -388,7 +459,7 @@ export function createSoldierBots(scene) {
 
         // Visual shot effect: recoil + muzzle flash
         bot.recoilOffset = 0.05;
-        bot.soldier.weaponAssembly.position.z = 0.15 - bot.recoilOffset;
+        bot.soldier.weaponAssembly.position.z = 0.12 - bot.recoilOffset;
         bot.soldier.flash.visible = true;
         bot.soldier.flash.material.opacity = 1.0;
         bot.flashTimer = 0.06;

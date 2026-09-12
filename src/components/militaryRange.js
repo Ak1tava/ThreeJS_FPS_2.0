@@ -798,27 +798,87 @@ export function createMilitaryRange(scene) {
     rightTrack.castShadow = true;
     tank.add(rightTrack);
 
-    // Main Hull (single box)
-    const hullGeo = new THREE.BoxGeometry(2.6, 0.8, 5.8);
+    // Track side skirts
+    const skirtGeo = new THREE.BoxGeometry(0.06, 0.55, 5.6);
+    const lSkirt = new THREE.Mesh(skirtGeo, tankArmorDark);
+    lSkirt.position.set(-2.02, 0.5, 0);
+    tank.add(lSkirt);
+    const rSkirt = new THREE.Mesh(skirtGeo, tankArmorDark);
+    rSkirt.position.set(2.02, 0.5, 0);
+    tank.add(rSkirt);
+
+    // Main Hull lower
+    const hullGeo = new THREE.BoxGeometry(2.6, 0.7, 5.8);
     const hull = new THREE.Mesh(hullGeo, tankArmorDark);
-    hull.position.set(0, 0.8, 0);
+    hull.position.set(0, 0.75, 0);
     hull.castShadow = true;
     tank.add(hull);
 
-    // Turret (single box)
-    const turretGeo = new THREE.BoxGeometry(1.8, 0.8, 2.4);
+    // Hull top plate (flat deck)
+    const deckGeo = new THREE.BoxGeometry(2.6, 0.2, 3.6);
+    const deck = new THREE.Mesh(deckGeo, tankArmorDark);
+    deck.position.set(0, 1.2, -0.8);
+    tank.add(deck);
+
+    // Front glacis (sloped)
+    const glacisGeo = new THREE.BoxGeometry(2.58, 0.5, 1.8);
+    const glacis = new THREE.Mesh(glacisGeo, tankArmorDark);
+    glacis.position.set(0, 1.15, 1.8);
+    glacis.rotation.x = -Math.PI * 0.15;
+    glacis.castShadow = true;
+    tank.add(glacis);
+
+    // Turret
+    const turretGeo = new THREE.BoxGeometry(1.9, 0.8, 2.4);
     const turret = new THREE.Mesh(turretGeo, tankArmorDark);
-    turret.position.set(0, 1.6, -0.4);
+    turret.position.set(0, 1.7, -0.2);
     turret.castShadow = true;
     tank.add(turret);
 
-    // Barrel (cylinder sticking out front of turret)
-    const barrelGeo = new THREE.CylinderGeometry(0.15, 0.15, 4.0, 8);
+    // Commander cupola
+    const cupolaGeo = new THREE.CylinderGeometry(0.35, 0.4, 0.25, 10);
+    const cupola = new THREE.Mesh(cupolaGeo, tankArmorTrim);
+    cupola.position.set(-0.45, 2.2, -0.4);
+    cupola.castShadow = true;
+    tank.add(cupola);
+
+    // Mantlet (gun housing)
+    const mantletGeo = new THREE.BoxGeometry(0.8, 0.5, 0.5);
+    const mantlet = new THREE.Mesh(mantletGeo, tankArmorTrim);
+    mantlet.position.set(0, 1.7, 1.1);
+    mantlet.castShadow = true;
+    tank.add(mantlet);
+
+    // Barrel
+    const barrelGeo = new THREE.CylinderGeometry(0.12, 0.14, 4.0, 8);
     barrelGeo.rotateX(Math.PI / 2);
     const barrel = new THREE.Mesh(barrelGeo, metalDark);
-    barrel.position.set(0, 1.6, 2.6);
+    barrel.position.set(0, 1.7, 3.4);
     barrel.castShadow = true;
     tank.add(barrel);
+
+    // Muzzle brake
+    const muzzleGeo = new THREE.CylinderGeometry(0.18, 0.18, 0.35, 8);
+    muzzleGeo.rotateX(Math.PI / 2);
+    const muzzleBrake = new THREE.Mesh(muzzleGeo, tankArmorTrim);
+    muzzleBrake.position.set(0, 1.7, 5.5);
+    tank.add(muzzleBrake);
+
+    // Radio antenna
+    const antGeo = new THREE.CylinderGeometry(0.015, 0.025, 2.2, 6);
+    const ant = new THREE.Mesh(antGeo, metalDark);
+    ant.position.set(0.6, 3.0, -0.7);
+    tank.add(ant);
+
+    // Rear fuel drums
+    const fuelGeo = new THREE.CylinderGeometry(0.28, 0.28, 0.9, 10);
+    fuelGeo.rotateZ(Math.PI / 2);
+    const fuel1 = new THREE.Mesh(fuelGeo, redBarrelMaterial);
+    fuel1.position.set(-0.7, 1.3, -2.7);
+    tank.add(fuel1);
+    const fuel2 = new THREE.Mesh(fuelGeo, redBarrelMaterial);
+    fuel2.position.set(0.7, 1.3, -2.7);
+    tank.add(fuel2);
 
     return tank;
   }
@@ -920,27 +980,80 @@ export function createMilitaryRange(scene) {
     rightTrack.castShadow = true;
     bmp.add(rightTrack);
 
-    // Hull
-    const hullGeo = new THREE.BoxGeometry(2.4, 0.7, 5.4);
+    // Lower hull
+    const hullGeo = new THREE.BoxGeometry(2.3, 0.6, 5.0);
     const hull = new THREE.Mesh(hullGeo, tankArmorDark);
-    hull.position.set(0, 0.65, 0);
+    hull.position.set(0, 0.6, 0);
     hull.castShadow = true;
     bmp.add(hull);
 
-    // Turret
-    const turretGeo = new THREE.BoxGeometry(1.2, 0.6, 1.6);
+    // Front glacis (sloped)
+    const glacisGeo = new THREE.BoxGeometry(2.28, 0.4, 1.6);
+    const glacis = new THREE.Mesh(glacisGeo, tankArmorDark);
+    glacis.position.set(0, 0.9, 1.6);
+    glacis.rotation.x = -Math.PI * 0.2;
+    glacis.castShadow = true;
+    bmp.add(glacis);
+
+    // Upper deck
+    const deckGeo = new THREE.BoxGeometry(2.28, 0.3, 3.0);
+    const deck = new THREE.Mesh(deckGeo, tankArmorDark);
+    deck.position.set(0, 1.0, -0.6);
+    deck.castShadow = true;
+    bmp.add(deck);
+
+    // Turret (slightly tapered box)
+    const turretGeo = new THREE.BoxGeometry(1.3, 0.55, 1.5);
     const turret = new THREE.Mesh(turretGeo, tankArmorDark);
-    turret.position.set(0, 1.3, 0.2);
+    turret.position.set(0, 1.4, 0.2);
     turret.castShadow = true;
     bmp.add(turret);
 
-    // Barrel
-    const barrelGeo = new THREE.CylinderGeometry(0.08, 0.08, 2.5, 8);
+    // Cannon mantlet
+    const mantletGeo = new THREE.BoxGeometry(0.5, 0.35, 0.4);
+    const mantlet = new THREE.Mesh(mantletGeo, tankArmorTrim);
+    mantlet.position.set(0, 1.42, 0.95);
+    bmp.add(mantlet);
+
+    // 30mm barrel
+    const barrelGeo = new THREE.CylinderGeometry(0.04, 0.05, 2.8, 8);
     barrelGeo.rotateX(Math.PI / 2);
     const barrel = new THREE.Mesh(barrelGeo, metalDark);
-    barrel.position.set(0, 1.3, 2.0);
+    barrel.position.set(0, 1.44, 2.3);
     barrel.castShadow = true;
     bmp.add(barrel);
+
+    // Muzzle brake
+    const muzzleGeo = new THREE.CylinderGeometry(0.07, 0.07, 0.25, 8);
+    muzzleGeo.rotateX(Math.PI / 2);
+    const muzzleBrake = new THREE.Mesh(muzzleGeo, tankArmorTrim);
+    muzzleBrake.position.set(0, 1.44, 3.75);
+    bmp.add(muzzleBrake);
+
+    // ATGM launcher tube on top
+    const atgmGeo = new THREE.CylinderGeometry(0.08, 0.08, 1.1, 8);
+    atgmGeo.rotateX(Math.PI / 2);
+    const atgm = new THREE.Mesh(atgmGeo, tankArmorTrim);
+    atgm.position.set(0, 1.8, 0.2);
+    bmp.add(atgm);
+
+    // Rear troop doors
+    for (const dx of [-0.5, 0.5]) {
+      const door = new THREE.Mesh(
+        new THREE.BoxGeometry(0.7, 0.6, 0.06),
+        tankArmorTrim
+      );
+      door.position.set(dx, 0.7, -2.55);
+      bmp.add(door);
+    }
+
+    // Radio antenna
+    const ant = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.015, 0.02, 2.0, 6),
+      metalDark
+    );
+    ant.position.set(0.6, 2.2, -0.3);
+    bmp.add(ant);
 
     return bmp;
   }
@@ -965,35 +1078,89 @@ export function createMilitaryRange(scene) {
     rightTrack.castShadow = true;
     arty.add(rightTrack);
 
-    // Hull
-    const hullGeo = new THREE.BoxGeometry(2.8, 0.9, 6.6);
+    // Lower hull
+    const hullGeo = new THREE.BoxGeometry(2.7, 0.8, 6.2);
     const hull = new THREE.Mesh(hullGeo, tankArmorDark);
-    hull.position.set(0, 0.9, 0);
+    hull.position.set(0, 0.8, 0);
     hull.castShadow = true;
     arty.add(hull);
 
-    // Huge Turret
-    const turretGeo = new THREE.BoxGeometry(2.2, 1.2, 3.0);
+    // Front glacis (sloped)
+    const glacisGeo = new THREE.BoxGeometry(2.68, 0.55, 1.8);
+    const glacis = new THREE.Mesh(glacisGeo, tankArmorDark);
+    glacis.position.set(0, 1.2, 2.0);
+    glacis.rotation.x = -Math.PI * 0.16;
+    arty.add(glacis);
+
+    // Upper hull deck
+    const deckGeo = new THREE.BoxGeometry(2.68, 0.35, 4.0);
+    const deck = new THREE.Mesh(deckGeo, tankArmorDark);
+    deck.position.set(0, 1.3, -0.8);
+    arty.add(deck);
+
+    // Massive boxy turret
+    const turretGeo = new THREE.BoxGeometry(2.4, 1.3, 3.4);
     const turret = new THREE.Mesh(turretGeo, tankArmorDark);
-    turret.position.set(0, 1.95, -0.6);
+    turret.position.set(0, 2.1, -0.3);
     turret.castShadow = true;
     arty.add(turret);
 
-    // Massive Barrel elevated
-    const barrelGeo = new THREE.CylinderGeometry(0.2, 0.2, 5.0, 8);
+    // Turret rear bustle
+    const bustleGeo = new THREE.BoxGeometry(2.1, 0.9, 1.2);
+    const bustle = new THREE.Mesh(bustleGeo, tankArmorTrim);
+    bustle.position.set(0, 2.0, -2.3);
+    bustle.castShadow = true;
+    arty.add(bustle);
+
+    // Gun mantlet / cradle
+    const mantletGeo = new THREE.BoxGeometry(1.0, 0.8, 0.7);
+    const mantlet = new THREE.Mesh(mantletGeo, tankArmorTrim);
+    mantlet.position.set(0, 2.1, 1.7);
+    mantlet.castShadow = true;
+    arty.add(mantlet);
+
+    // Massive 152mm Gun (Elevated)
+    const gunGroup = new THREE.Group();
+    gunGroup.position.set(0, 2.1, 2.0);
+    gunGroup.rotation.x = -Math.PI * 0.14;
+
+    // Main barrel
+    const barrelGeo = new THREE.CylinderGeometry(0.16, 0.22, 6.0, 10);
     barrelGeo.rotateX(Math.PI / 2);
     const barrel = new THREE.Mesh(barrelGeo, metalDark);
-    
-    // Elevate barrel by grouping it and rotating
-    const gunGroup = new THREE.Group();
-    gunGroup.position.set(0, 1.95, 0.9);
-    gunGroup.rotation.x = -Math.PI * 0.15; // Point up
-    
-    barrel.position.set(0, 0, 2.5);
+    barrel.position.set(0, 0, 3.0);
     barrel.castShadow = true;
     gunGroup.add(barrel);
-    
+
+    // Fume extractor
+    const fumeGeo = new THREE.CylinderGeometry(0.28, 0.28, 0.9, 10);
+    fumeGeo.rotateX(Math.PI / 2);
+    const fume = new THREE.Mesh(fumeGeo, tankArmorTrim);
+    fume.position.set(0, 0, 2.8);
+    gunGroup.add(fume);
+
+    // Muzzle brake
+    const brakeGeo = new THREE.BoxGeometry(0.45, 0.38, 0.6);
+    const brake = new THREE.Mesh(brakeGeo, tankArmorTrim);
+    brake.position.set(0, 0, 6.1);
+    gunGroup.add(brake);
+
     arty.add(gunGroup);
+
+    // Commander cupola
+    const cupolaGeo = new THREE.CylinderGeometry(0.35, 0.4, 0.25, 10);
+    const cupola = new THREE.Mesh(cupolaGeo, tankArmorTrim);
+    cupola.position.set(-0.6, 2.85, -0.4);
+    arty.add(cupola);
+
+    // Fuel drums at rear
+    for (const dx of [-0.8, 0.8]) {
+      const drumGeo = new THREE.CylinderGeometry(0.3, 0.3, 0.85, 10);
+      drumGeo.rotateZ(Math.PI / 2);
+      const drum = new THREE.Mesh(drumGeo, greenBarrelMaterial);
+      drum.position.set(dx, 1.4, -3.2);
+      arty.add(drum);
+    }
 
     return arty;
   }
