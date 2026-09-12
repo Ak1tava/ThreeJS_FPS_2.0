@@ -1126,65 +1126,74 @@ export function createMilitaryRange(scene) {
   militaryWorld.add(createMilitaryTruck(20, 0, -4, -Math.PI * 0.35));
 
   // ==========================================
-  // БОЕВАЯ МАШИНА ПЕХОТЫ (БМП-2)
+  // БОЕВАЯ МАШИНА ПЕХОТЫ (БМП-2 / МАЛЕНЬКИЙ ТАНК)
   // ==========================================
   function createBMP(x, y, z, rotY = 0) {
     const bmp = new THREE.Group();
     bmp.position.set(x, y, z);
     bmp.rotation.y = rotY;
 
-    // Tracks
-    const trackGeo = new THREE.BoxGeometry(0.6, 0.6, 5.2);
+    // 1. Tracks (Left & Right)
+    const trackGeo = new THREE.BoxGeometry(0.65, 0.65, 5.2);
     const leftTrack = new THREE.Mesh(trackGeo, metalDark);
-    leftTrack.position.set(-1.4, 0.3, 0);
+    leftTrack.position.set(-1.4, 0.325, 0);
     leftTrack.castShadow = true;
     bmp.add(leftTrack);
 
     const rightTrack = new THREE.Mesh(trackGeo, metalDark);
-    rightTrack.position.set(1.4, 0.3, 0);
+    rightTrack.position.set(1.4, 0.325, 0);
     rightTrack.castShadow = true;
     bmp.add(rightTrack);
 
+    // Track side skirts (flush and level)
+    const skirtGeo = new THREE.BoxGeometry(0.06, 0.45, 5.0);
+    const lSkirt = new THREE.Mesh(skirtGeo, tankArmorTrim);
+    lSkirt.position.set(-1.75, 0.45, 0);
+    bmp.add(lSkirt);
+
+    const rSkirt = new THREE.Mesh(skirtGeo, tankArmorTrim);
+    rSkirt.position.set(1.75, 0.45, 0);
+    bmp.add(rSkirt);
+
+    // 2. Main Hull (Straight, level, solid — NO protruding wedges)
     // Lower hull
-    const hullGeo = new THREE.BoxGeometry(2.3, 0.6, 5.0);
-    const hull = new THREE.Mesh(hullGeo, tankArmorDark);
-    hull.position.set(0, 0.6, 0);
-    hull.castShadow = true;
-    bmp.add(hull);
+    const hullLowerGeo = new THREE.BoxGeometry(2.2, 0.65, 5.0);
+    const hullLower = new THREE.Mesh(hullLowerGeo, tankArmorDark);
+    hullLower.position.set(0, 0.55, 0);
+    hullLower.castShadow = true;
+    bmp.add(hullLower);
 
-    // Front glacis (sloped)
-    const glacisGeo = new THREE.BoxGeometry(2.28, 0.4, 1.6);
-    const glacis = new THREE.Mesh(glacisGeo, tankArmorDark);
-    glacis.position.set(0, 0.9, 1.6);
-    glacis.rotation.x = -Math.PI * 0.2;
-    glacis.castShadow = true;
-    bmp.add(glacis);
-
-    // Upper deck
-    const deckGeo = new THREE.BoxGeometry(2.28, 0.3, 3.0);
+    // Upper hull deck (straight level plate spanning across)
+    const deckGeo = new THREE.BoxGeometry(2.2, 0.35, 4.8);
     const deck = new THREE.Mesh(deckGeo, tankArmorDark);
-    deck.position.set(0, 1.0, -0.6);
+    deck.position.set(0, 0.95, -0.1);
     deck.castShadow = true;
     bmp.add(deck);
 
-    // Turret (slightly tapered box)
-    const turretGeo = new THREE.BoxGeometry(1.3, 0.55, 1.5);
+    // Front nose step / wave deflector (straight and level, NO tilt)
+    const noseGeo = new THREE.BoxGeometry(2.18, 0.28, 0.45);
+    const nose = new THREE.Mesh(noseGeo, tankArmorTrim);
+    nose.position.set(0, 0.78, 2.5);
+    bmp.add(nose);
+
+    // 3. Turret (Clean compact turret)
+    const turretGeo = new THREE.BoxGeometry(1.4, 0.55, 1.6);
     const turret = new THREE.Mesh(turretGeo, tankArmorDark);
-    turret.position.set(0, 1.4, 0.2);
+    turret.position.set(0, 1.35, 0.1);
     turret.castShadow = true;
     bmp.add(turret);
 
     // Cannon mantlet
     const mantletGeo = new THREE.BoxGeometry(0.5, 0.35, 0.4);
     const mantlet = new THREE.Mesh(mantletGeo, tankArmorTrim);
-    mantlet.position.set(0, 1.42, 0.95);
+    mantlet.position.set(0, 1.35, 1.05);
     bmp.add(mantlet);
 
-    // 30mm barrel
+    // 30mm barrel (straight forward)
     const barrelGeo = new THREE.CylinderGeometry(0.04, 0.05, 2.8, 8);
     barrelGeo.rotateX(Math.PI / 2);
     const barrel = new THREE.Mesh(barrelGeo, metalDark);
-    barrel.position.set(0, 1.44, 2.3);
+    barrel.position.set(0, 1.35, 2.45);
     barrel.castShadow = true;
     bmp.add(barrel);
 
@@ -1192,23 +1201,23 @@ export function createMilitaryRange(scene) {
     const muzzleGeo = new THREE.CylinderGeometry(0.07, 0.07, 0.25, 8);
     muzzleGeo.rotateX(Math.PI / 2);
     const muzzleBrake = new THREE.Mesh(muzzleGeo, tankArmorTrim);
-    muzzleBrake.position.set(0, 1.44, 3.75);
+    muzzleBrake.position.set(0, 1.35, 3.9);
     bmp.add(muzzleBrake);
 
-    // ATGM launcher tube on top
-    const atgmGeo = new THREE.CylinderGeometry(0.08, 0.08, 1.1, 8);
+    // ATGM launcher tube on turret roof
+    const atgmGeo = new THREE.CylinderGeometry(0.08, 0.08, 1.0, 8);
     atgmGeo.rotateX(Math.PI / 2);
     const atgm = new THREE.Mesh(atgmGeo, tankArmorTrim);
-    atgm.position.set(0, 1.8, 0.2);
+    atgm.position.set(0, 1.75, 0.1);
     bmp.add(atgm);
 
     // Rear troop doors
     for (const dx of [-0.5, 0.5]) {
       const door = new THREE.Mesh(
-        new THREE.BoxGeometry(0.7, 0.6, 0.06),
+        new THREE.BoxGeometry(0.7, 0.55, 0.06),
         tankArmorTrim
       );
-      door.position.set(dx, 0.7, -2.55);
+      door.position.set(dx, 0.6, -2.48);
       bmp.add(door);
     }
 
@@ -1217,7 +1226,7 @@ export function createMilitaryRange(scene) {
       new THREE.CylinderGeometry(0.015, 0.02, 2.0, 6),
       metalDark
     );
-    ant.position.set(0.6, 2.2, -0.3);
+    ant.position.set(0.55, 2.15, -0.3);
     bmp.add(ant);
 
     return bmp;

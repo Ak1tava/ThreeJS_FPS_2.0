@@ -12,22 +12,7 @@ function setupControls(
   // Movement & Shooting States
   let isSprinting = false;
   let isCrouching = false;
-  let lastSprintEndTime = 0;
-  const SPRINT_STOP_DELAY_MS = 350; // Pause after sprint before weapon can fire
-
-  function canShoot() {
-    // Cannot fire while sprinting
-    if (isSprinting) return false;
-    // In crouch, can fire immediately!
-    if (isCrouching) return true;
-    // After releasing Shift/stopping sprint, short recovery pause
-    const elapsedSinceSprint = performance.now() - lastSprintEndTime;
-    if (elapsedSinceSprint < SPRINT_STOP_DELAY_MS) {
-      return false;
-    }
-    return true;
-  }
-
+  let isMouseDown = false;
   let isShiftHeld = false;
 
   document.addEventListener("keydown", (event) => {
@@ -48,6 +33,7 @@ function setupControls(
     for (const k in keyStates) keyStates[k] = false;
     isShiftHeld = false;
     isSprinting = false;
+    isMouseDown = false;
   });
 
   const overlay = document.getElementById("start-overlay");
@@ -64,6 +50,7 @@ function setupControls(
     if (document.pointerLockElement === document.body) {
       if (overlay) overlay.classList.add("hidden");
     } else {
+      isMouseDown = false;
       if (overlay) {
         overlay.classList.remove("hidden");
         const btnText = overlay.querySelector(".btn-text");
@@ -72,11 +59,19 @@ function setupControls(
     }
   });
 
-  document.body.addEventListener("mousedown", () => {
-    if (document.pointerLockElement === document.body) {
-      if (canShoot()) {
+  document.body.addEventListener("mousedown", (e) => {
+    if (e.button === 0) {
+      isMouseDown = true;
+      if (document.pointerLockElement === document.body) {
+        if (isSprinting) isSprinting = false;
         throwBall(camera, playerDirection);
       }
+    }
+  });
+
+  window.addEventListener("mouseup", (e) => {
+    if (e.button === 0) {
+      isMouseDown = false;
     }
   });
 
@@ -99,17 +94,17 @@ function setupControls(
       if (setPlayerCrouch) setPlayerCrouch(isCrouching);
     }
 
-    // 2. Sprint logic: Shift held + moving forward (KeyW or ArrowUp), not crouching
+    // 2. Sprint logic: Shift held + moving forward, not crouching, not actively shooting
     const isMovingForward = Boolean(
       keyStates["KeyW"] || keyStates["ArrowUp"]
     );
-    const wantSprint = isShiftHeld && isMovingForward && !isCrouching;
-
-    if (isSprinting && !wantSprint) {
-      // Just stopped sprinting -> start inertia recovery timer
-      lastSprintEndTime = performance.now();
-    }
+    const wantSprint = isShiftHeld && isMovingForward && !isCrouching && !isMouseDown;
     isSprinting = wantSprint;
+
+    // 3. Automatic fire while holding mouse button
+    if (isMouseDown && document.pointerLockElement === document.body && !isSprinting) {
+      throwBall(camera, playerDirection);
+    }
 
     // Camera FOV effect when sprinting (subtle sensation of speed)
     const targetFov = isSprinting ? 75 : 70;

@@ -157,46 +157,17 @@ function createPhysics(scene) {
   }
 
   let isReloading = false;
-  let isAnimationPlaying = false;
-
-  function playAction(
-    animationName,
-    soundKey,
-    autoIdle = true,
-    idleDelay = 300
-  ) {
-    if (isAnimationPlaying) return;
-
-    isAnimationPlaying = true;
-    playGunAnimation(animationName);
-
-    if (soundKey === "shoot") {
-      playInstantGunshot();
-    } else if (soundKey && sounds[soundKey]) {
-      sounds[soundKey].pause();
-      sounds[soundKey].currentTime = 0;
-      sounds[soundKey].play().catch(() => {});
-    }
-
-    if (autoIdle) {
-      setTimeout(() => {
-        playGunAnimation("Armature|Idle");
-        isAnimationPlaying = false;
-      }, idleDelay);
-    }
-
-    if (animationName === "Armature|Reload") {
-      setTimeout(() => {
-        isReloading = false;
-        isAnimationPlaying = false;
-      }, 3000);
-    }
-  }
-
   let shotCount = 0;
+  let lastShotTime = 0;
+  const FIRE_RATE_MS = 110; // ~550 RPM (responsive assault rifle rate)
+  let idleTimer = null;
 
   function throwBall(camera) {
-    if (isReloading || isAnimationPlaying) return;
+    if (isReloading) return;
+
+    const now = performance.now();
+    if (now - lastShotTime < FIRE_RATE_MS) return;
+    lastShotTime = now;
 
     const bullet = bullets[bulletIdx];
 
@@ -223,27 +194,44 @@ function createPhysics(scene) {
     bullet.active = true;
     bullet.timeAlive = 0;
 
-    // Trigger Shoot Animation + Sound
-    playAction("Armature|Shoot", "shoot");
+    // Instant Gunshot Audio + Animation
+    playInstantGunshot();
+    playGunAnimation("Armature|Shoot");
+
+    if (idleTimer) clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => {
+      if (!isReloading) {
+        playGunAnimation("Armature|Idle");
+      }
+    }, 130);
 
     shotCount++;
-    lastShotTime = performance.now();
 
     bulletIdx = (bulletIdx + 1) % bullets.length;
 
-    // Reload after 10 shots
-    if (shotCount >= 10) {
+    // Reload after 30 shots (standard magazine capacity)
+    if (shotCount >= 30) {
       reloadGun();
       shotCount = 0;
     }
   }
 
   function reloadGun() {
-    if (isReloading || isAnimationPlaying) return;
+    if (isReloading) return;
 
     isReloading = true;
-    playAction("Armature|Reload", "reload", true, 3000);
-    isAnimationPlaying = true;
+    if (idleTimer) clearTimeout(idleTimer);
+    playGunAnimation("Armature|Reload");
+    if (sounds.reload) {
+      sounds.reload.pause();
+      sounds.reload.currentTime = 0;
+      sounds.reload.play().catch(() => {});
+    }
+
+    setTimeout(() => {
+      isReloading = false;
+      playGunAnimation("Armature|Idle");
+    }, 3000);
   }
 
   function updatePlayer(deltaTime, worldOctree, camera) {
