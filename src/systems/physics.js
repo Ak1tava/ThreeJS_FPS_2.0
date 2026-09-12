@@ -215,6 +215,7 @@ function createPhysics(scene) {
 
     const result = worldOctree.capsuleIntersect(playerCollider);
     playerOnFloor = result ? result.normal.y > 0 : false;
+    playerCollider.onFloor = playerOnFloor;
 
     if (result) {
       playerVelocity.addScaledVector(

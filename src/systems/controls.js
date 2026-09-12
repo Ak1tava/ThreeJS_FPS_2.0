@@ -28,14 +28,27 @@ function setupControls(
     return true;
   }
 
-  document.addEventListener(
-    "keydown",
-    (event) => (keyStates[event.code] = true)
-  );
-  document.addEventListener(
-    "keyup",
-    (event) => (keyStates[event.code] = false)
-  );
+  let isShiftHeld = false;
+
+  document.addEventListener("keydown", (event) => {
+    keyStates[event.code] = true;
+    if (event.shiftKey || event.code === "ShiftLeft" || event.code === "ShiftRight") {
+      isShiftHeld = true;
+    }
+  });
+
+  document.addEventListener("keyup", (event) => {
+    keyStates[event.code] = false;
+    if (!event.shiftKey && (event.code === "ShiftLeft" || event.code === "ShiftRight")) {
+      isShiftHeld = false;
+    }
+  });
+
+  window.addEventListener("blur", () => {
+    for (const k in keyStates) keyStates[k] = false;
+    isShiftHeld = false;
+    isSprinting = false;
+  });
 
   document.body.addEventListener("click", () =>
     document.body.requestPointerLock()
@@ -68,13 +81,11 @@ function setupControls(
       if (setPlayerCrouch) setPlayerCrouch(isCrouching);
     }
 
-    // 2. Sprint logic (Shift held + W forward, on floor, not crouching)
-    const isHoldingShift = Boolean(
-      keyStates["ShiftLeft"] || keyStates["ShiftRight"]
+    // 2. Sprint logic: Shift held + moving forward (KeyW or ArrowUp), not crouching
+    const isMovingForward = Boolean(
+      keyStates["KeyW"] || keyStates["ArrowUp"]
     );
-    const isMovingForward = Boolean(keyStates["KeyW"]);
-    const wantSprint =
-      isHoldingShift && isMovingForward && !isCrouching && playerOnFloor;
+    const wantSprint = isShiftHeld && isMovingForward && !isCrouching;
 
     if (isSprinting && !wantSprint) {
       // Just stopped sprinting -> start inertia recovery timer
@@ -82,15 +93,24 @@ function setupControls(
     }
     isSprinting = wantSprint;
 
+    // Camera FOV effect when sprinting (sensation of speed)
+    const targetFov = isSprinting ? 80 : 70;
+    if (Math.abs(camera.fov - targetFov) > 0.1) {
+      camera.fov = THREE.MathUtils.lerp(camera.fov, targetFov, 0.12);
+      camera.updateProjectionMatrix();
+    }
+
     // Speed calculation
     let currentSpeed = 25; // Normal walking speed
     if (isSprinting) {
-      currentSpeed = 46; // Sprint speed
+      currentSpeed = 55; // Fast sprint speed (2.2x!)
     } else if (isCrouching) {
       currentSpeed = 13; // Slower crouch crawl
     }
 
-    const speedDelta = deltaTime * (playerOnFloor ? currentSpeed : 8);
+    // Use currentSpeed, or 75% when airborne
+    const onFloor = playerOnFloor !== false;
+    const speedDelta = deltaTime * (onFloor ? currentSpeed : currentSpeed * 0.75);
 
     // Update camera matrix
     camera.updateMatrixWorld();
@@ -104,13 +124,13 @@ function setupControls(
       side.setFromMatrixColumn(camera.matrixWorld, 0).normalize();
     }
 
-    if (keyStates["KeyW"])
+    if (keyStates["KeyW"] || keyStates["ArrowUp"])
       playerVelocity.add(forward.clone().multiplyScalar(speedDelta));
-    if (keyStates["KeyS"])
+    if (keyStates["KeyS"] || keyStates["ArrowDown"])
       playerVelocity.add(forward.clone().multiplyScalar(-speedDelta));
-    if (keyStates["KeyA"])
+    if (keyStates["KeyA"] || keyStates["ArrowLeft"])
       playerVelocity.add(side.clone().multiplyScalar(-speedDelta));
-    if (keyStates["KeyD"])
+    if (keyStates["KeyD"] || keyStates["ArrowRight"])
       playerVelocity.add(side.clone().multiplyScalar(speedDelta));
 
     // Jump only when on floor and not crouching
