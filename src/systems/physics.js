@@ -91,6 +91,54 @@ function createPhysics(scene) {
     });
   }
 
+  // Zero-latency Web Audio API setup for instant gunshot response
+  let audioCtx = null;
+  let gunshotBuffer = null;
+
+  function getAudioContext() {
+    if (!audioCtx && (window.AudioContext || window.webkitAudioContext)) {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      audioCtx = new AudioContextClass();
+    }
+    if (audioCtx && audioCtx.state === "suspended") {
+      audioCtx.resume();
+    }
+    return audioCtx;
+  }
+
+  // Pre-decode gunshot into RAM buffer for 0ms latency playback
+  fetch("/sounds/gunshot.wav")
+    .then((res) => res.arrayBuffer())
+    .then((data) => {
+      const ctx = getAudioContext();
+      if (ctx) return ctx.decodeAudioData(data);
+    })
+    .then((decoded) => {
+      if (decoded) gunshotBuffer = decoded;
+    })
+    .catch(() => {});
+
+  // Unlock audio context on initial user interaction
+  document.addEventListener("pointerdown", () => getAudioContext(), { once: true });
+  document.addEventListener("keydown", () => getAudioContext(), { once: true });
+
+  function playInstantGunshot() {
+    const ctx = getAudioContext();
+    if (ctx && gunshotBuffer) {
+      const source = ctx.createBufferSource();
+      source.buffer = gunshotBuffer;
+      const gainNode = ctx.createGain();
+      gainNode.gain.value = 0.9;
+      source.connect(gainNode);
+      gainNode.connect(ctx.destination);
+      source.start(0);
+    } else {
+      const fallback = new Audio("/sounds/gunshot.wav");
+      fallback.volume = 0.85;
+      fallback.play().catch(() => {});
+    }
+  }
+
   // Sounds
   const sounds = {
     shoot: new Audio("/sounds/gunshot.wav"),
@@ -123,9 +171,7 @@ function createPhysics(scene) {
     playGunAnimation(animationName);
 
     if (soundKey === "shoot") {
-      const shotAudio = sounds.shoot.cloneNode();
-      shotAudio.volume = 0.85;
-      shotAudio.play().catch(() => {});
+      playInstantGunshot();
     } else if (soundKey && sounds[soundKey]) {
       sounds[soundKey].pause();
       sounds[soundKey].currentTime = 0;
