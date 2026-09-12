@@ -37,13 +37,15 @@ const {
   updateSpheres,
   throwBall,
   worldOctree,
-} = createPhysics(scene, animations); // Pass animations to createPhysics
+  setPlayerCrouch,
+} = createPhysics(scene, animations);
 
 const applyControls = setupControls(
-  camera, // Pass the correct camera instance
+  camera,
   playerVelocity,
   throwBall,
-  playerDirection
+  playerDirection,
+  setPlayerCrouch
 );
 
 // Load World

@@ -93,9 +93,20 @@ function createPhysics(scene) {
 
   // Sounds
   const sounds = {
-    shoot: new Audio("/sounds/laser.mp3"),
+    shoot: new Audio("/sounds/gunshot.wav"),
     reload: new Audio("/sounds/reload.mp3"),
   };
+
+  let isCrouched = false;
+  function setPlayerCrouch(crouch) {
+    if (isCrouched === crouch) return;
+    isCrouched = crouch;
+    if (crouch) {
+      playerCollider.end.y = playerCollider.start.y + 0.45;
+    } else {
+      playerCollider.end.y = playerCollider.start.y + 1.0;
+    }
+  }
 
   let isReloading = false;
   let isAnimationPlaying = false;
@@ -111,7 +122,11 @@ function createPhysics(scene) {
     isAnimationPlaying = true;
     playGunAnimation(animationName);
 
-    if (soundKey && sounds[soundKey]) {
+    if (soundKey === "shoot") {
+      const shotAudio = sounds.shoot.cloneNode();
+      shotAudio.volume = 0.85;
+      shotAudio.play().catch(() => {});
+    } else if (soundKey && sounds[soundKey]) {
       sounds[soundKey].pause();
       sounds[soundKey].currentTime = 0;
       sounds[soundKey].play().catch(() => {});
@@ -276,6 +291,7 @@ function createPhysics(scene) {
     updateSpheres,
     throwBall,
     worldOctree,
+    setPlayerCrouch,
   };
 }
 
