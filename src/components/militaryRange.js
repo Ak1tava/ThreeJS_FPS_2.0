@@ -462,6 +462,245 @@ export function createMilitaryRange(scene) {
   militaryWorld.add(firingLineGroup);
 
   // ==========================================
+  // DRONE EXHIBITION TABLES NEAR PLAYER SPAWN (0, 0, 0)
+  // ==========================================
+  function createFPVDrone(x, y, z, rotY = 0, withRPG = true) {
+    const drone = new THREE.Group();
+    drone.position.set(x, y, z);
+    drone.rotation.y = rotY;
+
+    // Carbon fiber X-frame
+    const armMat = new THREE.MeshStandardMaterial({
+      color: 0x1c1c1c,
+      roughness: 0.8,
+      metalness: 0.2,
+    });
+    const arm1 = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.015, 0.04), armMat);
+    arm1.rotation.y = Math.PI / 4;
+    drone.add(arm1);
+    const arm2 = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.015, 0.04), armMat);
+    arm2.rotation.y = -Math.PI / 4;
+    drone.add(arm2);
+
+    // Center electronics stack
+    const stack = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.04, 0.09), metalDark);
+    stack.position.y = 0.02;
+    drone.add(stack);
+
+    // Top LiPo battery with yellow warning wrap
+    const batMat = new THREE.MeshStandardMaterial({ color: 0xdeb021, roughness: 0.6 });
+    const battery = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.045, 0.12), batMat);
+    battery.position.set(0, 0.055, -0.01);
+    drone.add(battery);
+
+    // Front FPV camera lens
+    const camMat = new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.9, roughness: 0.1 });
+    const cam = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.03, 8), camMat);
+    cam.rotation.x = -Math.PI / 3;
+    cam.position.set(0, 0.035, 0.06);
+    drone.add(cam);
+
+    // 4 Motors & 3-Blade Propellers
+    const motorMat = new THREE.MeshStandardMaterial({ color: 0xb32424, metalness: 0.8, roughness: 0.3 });
+    const propMat = new THREE.MeshStandardMaterial({ color: 0x151515, roughness: 0.6 });
+    const r = 0.13;
+    for (const [mx, mz] of [[r, r], [-r, r], [r, -r], [-r, -r]]) {
+      const motor = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.025, 8), motorMat);
+      motor.position.set(mx, 0.02, mz);
+      drone.add(motor);
+
+      const propGroup = new THREE.Group();
+      propGroup.position.set(mx, 0.035, mz);
+      for (let b = 0; b < 3; b++) {
+        const blade = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.003, 0.015), propMat);
+        blade.position.x = 0.04;
+        blade.rotation.y = (b * Math.PI * 2) / 3;
+        propGroup.add(blade);
+      }
+      drone.add(propGroup);
+    }
+
+    // RPG-7 warhead payload mockup strapped underneath
+    if (withRPG) {
+      const payloadGroup = new THREE.Group();
+      payloadGroup.position.set(0, -0.04, 0);
+
+      const rpgMat = new THREE.MeshStandardMaterial({ color: 0x485338, roughness: 0.7 });
+      const rocketBody = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.28, 10), rpgMat);
+      rocketBody.rotation.x = Math.PI / 2;
+      payloadGroup.add(rocketBody);
+
+      const warhead = new THREE.Mesh(new THREE.ConeGeometry(0.045, 0.12, 10), rpgMat);
+      warhead.rotation.x = Math.PI / 2;
+      warhead.position.z = 0.18;
+      payloadGroup.add(warhead);
+
+      drone.add(payloadGroup);
+    }
+
+    return drone;
+  }
+
+  function createReconDrone(x, y, z, rotY = 0) {
+    const drone = new THREE.Group();
+    drone.position.set(x, y, z);
+    drone.rotation.y = rotY;
+
+    // Sleek grey aerodynamic body
+    const bodyMat = new THREE.MeshStandardMaterial({ color: 0x6e7378, roughness: 0.5, metalness: 0.3 });
+    const body = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.07, 0.32), bodyMat);
+    body.position.y = 0.05;
+    drone.add(body);
+
+    // 4 folding arms
+    const armMat = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.6 });
+    for (const [ax, az, rot] of [
+      [-0.14, 0.12, -0.3],
+      [0.14, 0.12, 0.3],
+      [-0.16, -0.12, -0.4],
+      [0.16, -0.12, 0.4]
+    ]) {
+      const arm = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.02, 0.03), armMat);
+      arm.position.set(ax, 0.05, az);
+      arm.rotation.y = rot;
+      drone.add(arm);
+
+      const motor = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.02, 8), metalDark);
+      motor.position.set(ax * 1.6, 0.06, az * 1.5);
+      drone.add(motor);
+
+      const prop = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.004, 0.02), metalDark);
+      prop.position.set(ax * 1.6, 0.075, az * 1.5);
+      drone.add(prop);
+    }
+
+    // Optical camera gimbal
+    const camSphere = new THREE.Mesh(new THREE.SphereGeometry(0.03, 10, 10), metalDark);
+    camSphere.position.set(0, 0.01, 0.16);
+    drone.add(camSphere);
+
+    // Landing legs
+    for (const lx of [-0.08, 0.08]) {
+      const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.08, 6), metalDark);
+      leg.position.set(lx, 0.03, 0);
+      leg.rotation.z = lx > 0 ? -0.2 : 0.2;
+      drone.add(leg);
+    }
+
+    return drone;
+  }
+
+  function createDroneController(x, y, z, rotY = 0) {
+    const ctrl = new THREE.Group();
+    ctrl.position.set(x, y, z);
+    ctrl.rotation.y = rotY;
+
+    // Body
+    const bodyMat = new THREE.MeshStandardMaterial({ color: 0x1e1e1e, roughness: 0.7 });
+    const body = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.04, 0.16), bodyMat);
+    body.position.y = 0.02;
+    ctrl.add(body);
+
+    // Display screen
+    const screenMat = new THREE.MeshStandardMaterial({ color: 0x0e2a3a, metalness: 0.8, roughness: 0.2 });
+    const screen = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.008, 0.09), screenMat);
+    screen.position.set(0, 0.045, 0.01);
+    ctrl.add(screen);
+
+    // 2 Joysticks
+    const stickMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.9, roughness: 0.2 });
+    for (const sx of [-0.06, 0.06]) {
+      const stick = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.005, 0.025, 6), stickMat);
+      stick.position.set(sx, 0.05, -0.04);
+      ctrl.add(stick);
+    }
+
+    // Antenna
+    const ant = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, 0.15, 6), metalDark);
+    ant.rotation.z = Math.PI / 2;
+    ant.position.set(0, 0.03, -0.09);
+    ctrl.add(ant);
+
+    return ctrl;
+  }
+
+  function createDroneGoggles(x, y, z, rotY = 0) {
+    const goggles = new THREE.Group();
+    goggles.position.set(x, y, z);
+    goggles.rotation.y = rotY;
+
+    const gogMat = new THREE.MeshStandardMaterial({ color: 0x242426, roughness: 0.6 });
+    const visor = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.07, 0.09), gogMat);
+    visor.position.y = 0.035;
+    goggles.add(visor);
+
+    // Head strap
+    const strapMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.9 });
+    const strap = new THREE.Mesh(new THREE.TorusGeometry(0.08, 0.012, 6, 16), strapMat);
+    strap.rotation.x = Math.PI / 2;
+    strap.position.set(0, 0.035, -0.05);
+    goggles.add(strap);
+
+    // 2 antennas
+    for (const ax of [-0.06, 0.06]) {
+      const stalk = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.05, 6), metalDark);
+      stalk.position.set(ax, 0.08, 0.02);
+      goggles.add(stalk);
+      const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.015, 8), redBarrelMaterial);
+      cap.position.set(ax, 0.11, 0.02);
+      goggles.add(cap);
+    }
+
+    return goggles;
+  }
+
+  function createDroneTable(x, z, rotY = 0) {
+    const tableGroup = new THREE.Group();
+    tableGroup.position.set(x, 0, z);
+    tableGroup.rotation.y = rotY;
+
+    // Military table top
+    const tableMat = new THREE.MeshStandardMaterial({ color: 0x4a3d2c, roughness: 0.85 });
+    const top = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.08, 1.0), tableMat);
+    top.position.y = 0.85;
+    top.castShadow = true;
+    top.receiveShadow = true;
+    tableGroup.add(top);
+
+    // 4 legs
+    const legGeo = new THREE.BoxGeometry(0.08, 0.85, 0.08);
+    for (const [lx, lz] of [[-1.1, -0.4], [1.1, -0.4], [-1.1, 0.4], [1.1, 0.4]]) {
+      const leg = new THREE.Mesh(legGeo, tableMat);
+      leg.position.set(lx, 0.425, lz);
+      leg.castShadow = true;
+      tableGroup.add(leg);
+    }
+
+    return tableGroup;
+  }
+
+  // Display Tables stationed beside the player spawn point at (0, 0, 0)
+  const droneStationGroup = new THREE.Group();
+
+  // Left Table: 2 FPV Attack Drones with RPG payloads + FPV Goggles
+  const leftTable = createDroneTable(-2.4, 0.4, 0.08);
+  leftTable.add(createFPVDrone(-0.6, 0.94, 0.05, 0.35, true));
+  leftTable.add(createFPVDrone(0.6, 0.94, -0.05, -0.2, true));
+  leftTable.add(createDroneGoggles(0, 0.94, -0.15, 0.1));
+  droneStationGroup.add(leftTable);
+
+  // Right Table: Reconnaissance Drone + Remote Controller + Ammo/Battery crate
+  const rightTable = createDroneTable(2.4, 0.4, -0.08);
+  rightTable.add(createReconDrone(-0.5, 0.94, 0, -0.25));
+  rightTable.add(createDroneController(0.4, 0.94, 0.05, 0.15));
+  droneStationGroup.add(rightTable);
+
+  // Ready FPV Drone sitting directly on the front firing bench
+  firingLineGroup.add(createFPVDrone(0, 0.94, 1.2, 0, true));
+
+  militaryWorld.add(droneStationGroup);
+
+  // ==========================================
   // 4. INTERACTIVE SHOOTING TARGETS
   // ==========================================
   function createInteractiveTarget(x, z, type = "round") {
@@ -730,6 +969,253 @@ export function createMilitaryRange(scene) {
   }
 
   militaryWorld.add(createMilitaryTruck(20, 0, -4, -Math.PI * 0.35));
+
+  // ==========================================
+  // БОЕВАЯ МАШИНА ПЕХОТЫ (БМП-2)
+  // ==========================================
+  function createBMP(x, y, z, rotY = 0) {
+    const bmp = new THREE.Group();
+    bmp.position.set(x, y, z);
+    bmp.rotation.y = rotY;
+
+    // Tracks & rubber skirts
+    const trackGeo = new THREE.BoxGeometry(0.65, 0.65, 5.6);
+    const leftTrack = new THREE.Mesh(trackGeo, metalDark);
+    leftTrack.position.set(-1.45, 0.35, 0);
+    leftTrack.castShadow = true;
+    bmp.add(leftTrack);
+
+    const rightTrack = new THREE.Mesh(trackGeo, metalDark);
+    rightTrack.position.set(1.45, 0.35, 0);
+    rightTrack.castShadow = true;
+    bmp.add(rightTrack);
+
+    // Road wheels (6 per side)
+    const wheelGeo = new THREE.CylinderGeometry(0.3, 0.3, 0.16, 12);
+    wheelGeo.rotateZ(Math.PI / 2);
+    for (let i = -2.0; i <= 2.0; i += 0.8) {
+      const wL = new THREE.Mesh(wheelGeo, tankArmorTrim);
+      wL.position.set(-1.8, 0.32, i);
+      bmp.add(wL);
+      const wR = new THREE.Mesh(wheelGeo, tankArmorTrim);
+      wR.position.set(1.8, 0.32, i);
+      bmp.add(wR);
+    }
+
+    // Lower hull
+    const hullLowerGeo = new THREE.BoxGeometry(2.35, 0.65, 5.2);
+    const hullLower = new THREE.Mesh(hullLowerGeo, tankArmorDark);
+    hullLower.position.set(0, 0.6, 0);
+    hullLower.castShadow = true;
+    bmp.add(hullLower);
+
+    // Front sloped wedge / glacis
+    const glacisGeo = new THREE.BoxGeometry(2.34, 0.45, 2.0);
+    const glacis = new THREE.Mesh(glacisGeo, tankArmorDark);
+    glacis.position.set(0, 0.95, 1.8);
+    glacis.rotation.x = -Math.PI * 0.22;
+    glacis.castShadow = true;
+    bmp.add(glacis);
+
+    // Wave deflector plate on glacis
+    const wavePlateGeo = new THREE.BoxGeometry(2.1, 0.08, 1.1);
+    const wavePlate = new THREE.Mesh(wavePlateGeo, tankArmorTrim);
+    wavePlate.position.set(0, 1.12, 1.9);
+    wavePlate.rotation.x = -Math.PI * 0.22;
+    bmp.add(wavePlate);
+
+    // Upper troop & engine deck
+    const deckGeo = new THREE.BoxGeometry(2.34, 0.35, 3.4);
+    const deck = new THREE.Mesh(deckGeo, tankArmorDark);
+    deck.position.set(0, 1.05, -0.7);
+    deck.castShadow = true;
+    bmp.add(deck);
+
+    // Conical BMP-2 Turret
+    const turretGeo = new THREE.CylinderGeometry(0.85, 1.1, 0.65, 14);
+    const turret = new THREE.Mesh(turretGeo, tankArmorDark);
+    turret.position.set(0, 1.5, 0.1);
+    turret.castShadow = true;
+    bmp.add(turret);
+
+    // 30mm 2A42 Autocannon
+    const cannonMantlet = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.4, 0.5), tankArmorTrim);
+    cannonMantlet.position.set(0, 1.55, 0.8);
+    bmp.add(cannonMantlet);
+
+    const cannonBarrelGeo = new THREE.CylinderGeometry(0.045, 0.055, 3.4, 10);
+    cannonBarrelGeo.rotateX(Math.PI / 2);
+    const cannon = new THREE.Mesh(cannonBarrelGeo, metalDark);
+    cannon.position.set(0, 1.58, 2.4);
+    cannon.castShadow = true;
+    bmp.add(cannon);
+
+    // Slotted muzzle brake
+    const bmpMuzzle = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.35, 10), tankArmorTrim);
+    bmpMuzzle.rotateX(Math.PI / 2);
+    bmpMuzzle.position.set(0, 1.58, 4.15);
+    bmp.add(bmpMuzzle);
+
+    // ATGM "Konkurs" launcher tube on turret top
+    const atgmTubeGeo = new THREE.CylinderGeometry(0.09, 0.09, 1.3, 10);
+    atgmTubeGeo.rotateX(Math.PI / 2);
+    const atgmTube = new THREE.Mesh(atgmTubeGeo, tankArmorTrim);
+    atgmTube.position.set(0, 2.0, 0.1);
+    atgmTube.castShadow = true;
+    bmp.add(atgmTube);
+
+    // Rear troop doors
+    for (const dx of [-0.55, 0.55]) {
+      const door = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.65, 0.05), tankArmorTrim);
+      door.position.set(dx, 0.75, -2.62);
+      bmp.add(door);
+    }
+
+    // Radio antenna
+    const ant = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.025, 2.2, 6), metalDark);
+    ant.position.set(0.65, 2.5, -0.3);
+    ant.rotation.z = -0.06;
+    bmp.add(ant);
+
+    return bmp;
+  }
+
+  // ==========================================
+  // САУ / АРТИЛЛЕРИЙСКАЯ УСТАНОВКА (152ММ ГАУБИЦА)
+  // ==========================================
+  function createArtillery(x, y, z, rotY = 0) {
+    const arty = new THREE.Group();
+    arty.position.set(x, y, z);
+    arty.rotation.y = rotY;
+
+    // Heavy tracked chassis
+    const trackGeo = new THREE.BoxGeometry(0.95, 0.95, 6.8);
+    const leftTrack = new THREE.Mesh(trackGeo, metalDark);
+    leftTrack.position.set(-1.75, 0.48, 0);
+    leftTrack.castShadow = true;
+    arty.add(leftTrack);
+
+    const rightTrack = new THREE.Mesh(trackGeo, metalDark);
+    rightTrack.position.set(1.75, 0.48, 0);
+    rightTrack.castShadow = true;
+    arty.add(rightTrack);
+
+    // Road wheels
+    const wheelGeo = new THREE.CylinderGeometry(0.4, 0.4, 0.22, 14);
+    wheelGeo.rotateZ(Math.PI / 2);
+    for (let i = -2.6; i <= 2.6; i += 0.88) {
+      const wL = new THREE.Mesh(wheelGeo, tankArmorTrim);
+      wL.position.set(-2.25, 0.45, i);
+      arty.add(wL);
+      const wR = new THREE.Mesh(wheelGeo, tankArmorTrim);
+      wR.position.set(2.25, 0.45, i);
+      arty.add(wR);
+    }
+
+    // Lower hull
+    const hullLowerGeo = new THREE.BoxGeometry(2.7, 0.85, 6.4);
+    const hullLower = new THREE.Mesh(hullLowerGeo, tankArmorDark);
+    hullLower.position.set(0, 0.8, 0);
+    hullLower.castShadow = true;
+    arty.add(hullLower);
+
+    // Sloped front glacis
+    const glacisGeo = new THREE.BoxGeometry(2.68, 0.65, 2.0);
+    const glacis = new THREE.Mesh(glacisGeo, tankArmorDark);
+    glacis.position.set(0, 1.25, 2.2);
+    glacis.rotation.x = -Math.PI * 0.18;
+    arty.add(glacis);
+
+    // Upper hull plate
+    const hullTopGeo = new THREE.BoxGeometry(2.68, 0.45, 4.4);
+    const hullTop = new THREE.Mesh(hullTopGeo, tankArmorDark);
+    hullTop.position.set(0, 1.35, -0.6);
+    arty.add(hullTop);
+
+    // Massive Boxy Artillery Turret
+    const turretGeo = new THREE.BoxGeometry(2.5, 1.4, 3.8);
+    const turret = new THREE.Mesh(turretGeo, tankArmorDark);
+    turret.position.set(0, 2.15, -0.2);
+    turret.castShadow = true;
+    arty.add(turret);
+
+    // Turret rear bustle
+    const bustleGeo = new THREE.BoxGeometry(2.2, 1.0, 1.4);
+    const bustle = new THREE.Mesh(bustleGeo, tankArmorTrim);
+    bustle.position.set(0, 2.1, -2.4);
+    bustle.castShadow = true;
+    arty.add(bustle);
+
+    // Gun Cradle & Mantlet
+    const cradle = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.9, 0.9), tankArmorTrim);
+    cradle.position.set(0, 2.15, 1.8);
+    cradle.castShadow = true;
+    arty.add(cradle);
+
+    // Massive 152mm Gun (Elevated ~25 degrees towards sky)
+    const gunAssembly = new THREE.Group();
+    gunAssembly.position.set(0, 2.15, 2.1);
+    gunAssembly.rotation.x = -Math.PI * 0.14; // ~25 deg elevation!
+
+    // Main barrel tube (6.8m long)
+    const barrelGeo = new THREE.CylinderGeometry(0.18, 0.24, 6.8, 14);
+    barrelGeo.rotateX(Math.PI / 2);
+    const barrel = new THREE.Mesh(barrelGeo, metalDark);
+    barrel.position.set(0, 0, 3.4);
+    barrel.castShadow = true;
+    gunAssembly.add(barrel);
+
+    // Fume extractor sleeve cylinder midway along barrel
+    const fumeGeo = new THREE.CylinderGeometry(0.3, 0.3, 1.2, 14);
+    fumeGeo.rotateX(Math.PI / 2);
+    const fume = new THREE.Mesh(fumeGeo, tankArmorTrim);
+    fume.position.set(0, 0, 3.2);
+    gunAssembly.add(fume);
+
+    // Massive Double-Baffle Muzzle Brake at tip
+    const brakeGeo = new THREE.BoxGeometry(0.55, 0.45, 0.85);
+    const brake = new THREE.Mesh(brakeGeo, tankArmorTrim);
+    brake.position.set(0, 0, 6.85);
+    brake.castShadow = true;
+    gunAssembly.add(brake);
+
+    arty.add(gunAssembly);
+
+    // Commander Cupola with 12.7mm Machine Gun
+    const cupola = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.45, 0.3, 12), tankArmorTrim);
+    cupola.position.set(-0.65, 2.95, -0.4);
+    arty.add(cupola);
+
+    const mgBarrel = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.03, 1.2, 8), metalDark);
+    mgBarrel.rotateX(Math.PI / 2);
+    mgBarrel.position.set(-0.65, 3.2, 0.2);
+    arty.add(mgBarrel);
+
+    // External fuel drums at rear
+    for (const dx of [-0.85, 0.85]) {
+      const drum = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.32, 0.9, 12), greenBarrelMaterial);
+      drum.rotateZ(Math.PI / 2);
+      drum.position.set(dx, 1.5, -3.4);
+      arty.add(drum);
+    }
+
+    return arty;
+  }
+
+  // ==========================================
+  // DEPLOYMENT OF HEAVY ARMOR ON FLANKS
+  // ==========================================
+  // LEFT FLANK ARMOR:
+  militaryWorld.add(createBMP(-20, 0, -20, -Math.PI * 0.12));
+  militaryWorld.add(createArtillery(-28, 0, -44, -Math.PI * 0.16));
+  militaryWorld.add(createBMP(-44, 0, -28, -Math.PI * 0.25));
+  militaryWorld.add(createTank(-36, 0, 26, Math.PI * 0.3));
+
+  // RIGHT FLANK ARMOR:
+  militaryWorld.add(createArtillery(35, 0, -24, Math.PI * 0.12));
+  militaryWorld.add(createBMP(32, 0, -50, -Math.PI * 0.08));
+  militaryWorld.add(createBMP(34, 0, -6, -Math.PI * 0.28));
+  militaryWorld.add(createTank(36, 0, 8, -Math.PI * 0.45));
 
   // ==========================================
   // 6. WATCHTOWER (СМОТРОВАЯ ВЫШКА)

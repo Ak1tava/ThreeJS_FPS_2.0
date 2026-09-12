@@ -50,9 +50,27 @@ function setupControls(
     isSprinting = false;
   });
 
-  document.body.addEventListener("click", () =>
-    document.body.requestPointerLock()
-  );
+  const overlay = document.getElementById("start-overlay");
+  const playBtn = document.getElementById("play-btn");
+
+  if (playBtn) {
+    playBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      document.body.requestPointerLock();
+    });
+  }
+
+  document.addEventListener("pointerlockchange", () => {
+    if (document.pointerLockElement === document.body) {
+      if (overlay) overlay.classList.add("hidden");
+    } else {
+      if (overlay) {
+        overlay.classList.remove("hidden");
+        const btnText = overlay.querySelector(".btn-text");
+        if (btnText) btnText.textContent = "ПРОДОЛЖИТЬ ИГРУ";
+      }
+    }
+  });
 
   document.body.addEventListener("mousedown", () => {
     if (document.pointerLockElement === document.body) {

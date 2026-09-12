@@ -2,5 +2,189 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: poppins, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  user-select: none;
+}
+
+body, html {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: #0b1118;
+}
+
+#container {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+/* Fullscreen Start / Pause Overlay */
+.start-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: radial-gradient(circle at center, rgba(12, 22, 33, 0.85) 0%, rgba(6, 10, 15, 0.95) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.35s ease;
+}
+
+.start-overlay.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Menu Card Container */
+.menu-card {
+  max-width: 520px;
+  width: 90%;
+  padding: 36px 32px 28px;
+  background: rgba(18, 28, 40, 0.75);
+  border: 1px solid rgba(212, 163, 89, 0.25);
+  border-radius: 18px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(212, 163, 89, 0.12);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  animation: cardFadeIn 0.5s ease-out;
+}
+
+@keyframes cardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* University Logo */
+.logo-wrapper {
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.univ-logo {
+  max-width: 260px;
+  max-height: 220px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.65)) drop-shadow(0 0 12px rgba(212, 163, 89, 0.25));
+  transition: transform 0.3s ease;
+}
+
+.univ-logo:hover {
+  transform: scale(1.02);
+}
+
+/* Play Button */
+.menu-actions {
+  width: 100%;
+  margin-bottom: 26px;
+}
+
+.play-btn {
+  position: relative;
+  width: 100%;
+  padding: 16px 28px;
+  font-size: 1.12rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #0b141f;
+  background: linear-gradient(135deg, #e4b869 0%, #d4a359 50%, #ba893e 100%);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(212, 163, 89, 0.4), 0 0 15px rgba(212, 163, 89, 0.2);
+  overflow: hidden;
+  transition: all 0.25s ease;
+}
+
+.play-btn:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #f0c77a 0%, #e0b067 50%, #c99849 100%);
+  box-shadow: 0 10px 28px rgba(212, 163, 89, 0.6), 0 0 25px rgba(212, 163, 89, 0.4);
+}
+
+.play-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 3px 12px rgba(212, 163, 89, 0.4);
+}
+
+.btn-glow {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transform: skewX(-25deg);
+  animation: buttonGlow 3.5s infinite;
+}
+
+@keyframes buttonGlow {
+  0% { left: -100%; }
+  30%, 100% { left: 200%; }
+}
+
+/* Controls Hint / Guide */
+.controls-guide {
+  width: 100%;
+  background: rgba(10, 16, 24, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.guide-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.88rem;
+  color: #a4b3c2;
+}
+
+.guide-keys {
+  display: flex;
+  gap: 4px;
+}
+
+kbd {
+  display: inline-block;
+  padding: 3px 7px;
+  font-family: monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #e5edf5;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.4);
+}
+
+.guide-desc {
+  font-weight: 500;
+  color: #cbd5e1;
 }

@@ -9,7 +9,45 @@
     <link rel="stylesheet" href="./styles/style.css" />
   </head>
   <body>
-    <!-- <h1>Test</h1> -->
     <div id="container"></div>
+
+    <!-- Start / Pause Menu Overlay -->
+    <div id="start-overlay" class="start-overlay">
+      <div class="menu-card">
+        <div class="logo-wrapper">
+          <img src="/images/saginov_logo.png" alt="Saginov Technical University" class="univ-logo" />
+        </div>
+        
+        <div class="menu-actions">
+          <button id="play-btn" class="play-btn">
+            <span class="btn-glow"></span>
+            <span class="btn-text">НАЖМИТЕ, ЧТОБЫ ИГРАТЬ</span>
+          </button>
+        </div>
+
+        <div class="controls-guide">
+          <div class="guide-row">
+            <span class="guide-keys"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span>
+            <span class="guide-desc">Передвижение</span>
+          </div>
+          <div class="guide-row">
+            <span class="guide-keys"><kbd>Shift</kbd></span>
+            <span class="guide-desc">Ускорение / Бег</span>
+          </div>
+          <div class="guide-row">
+            <span class="guide-keys"><kbd>C</kbd></span>
+            <span class="guide-desc">Присесть</span>
+          </div>
+          <div class="guide-row">
+            <span class="guide-keys"><kbd>ЛКМ</kbd></span>
+            <span class="guide-desc">Огонь</span>
+          </div>
+          <div class="guide-row">
+            <span class="guide-keys"><kbd>Esc</kbd></span>
+            <span class="guide-desc">Меню / Пауза</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
