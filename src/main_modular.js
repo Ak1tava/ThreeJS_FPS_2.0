@@ -6,6 +6,7 @@ import { createCamera, gunMixer } from "./components/camera";
 import { createLights } from "./components/lights";
 import { loadWorld } from "./components/world";
 import { addBgMusic } from "./components/music";
+import { createSoldierBots } from "./components/bots";
 
 // Systems
 import { createRenderer } from "./systems/renderer";
@@ -51,13 +52,17 @@ const applyControls = setupControls(
 // Load World
 loadWorld(scene, worldOctree);
 
+// Initialize 3 Soldier Bots alongside player
+const { updateBots } = createSoldierBots(scene);
+
 // Add Background Sound Effects
 addBgMusic();
 
 // Animation Loop
 
 function animate() {
-  const deltaTime = Math.min(0.05, clock.getDelta()) / STEPS_PER_FRAME;
+  const frameDelta = Math.min(0.05, clock.getDelta());
+  const deltaTime = frameDelta / STEPS_PER_FRAME;
 
   for (let i = 0; i < STEPS_PER_FRAME; i++) {
     applyControls(deltaTime, playerCollider.onFloor, camera);
@@ -67,6 +72,9 @@ function animate() {
 
   // ✅ Update gun animations
   if (gunMixer) gunMixer.update(deltaTime);
+
+  // ✅ Update soldier bots (firing at targets and reloading)
+  updateBots(frameDelta);
 
   renderer.render(scene, camera);
   stats.update();
