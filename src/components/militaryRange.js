@@ -786,98 +786,145 @@ export function createMilitaryRange(scene) {
     tank.position.set(x, y, z);
     tank.rotation.y = rotY;
 
-    // Tracks (Left & Right)
-    const trackGeo = new THREE.BoxGeometry(0.8, 0.8, 6.0);
+    // 1. Tracks (Left & Right)
+    const trackGeo = new THREE.BoxGeometry(0.85, 0.85, 6.2);
     const leftTrack = new THREE.Mesh(trackGeo, metalDark);
-    leftTrack.position.set(-1.6, 0.4, 0);
+    leftTrack.position.set(-1.6, 0.425, 0);
     leftTrack.castShadow = true;
     tank.add(leftTrack);
 
     const rightTrack = new THREE.Mesh(trackGeo, metalDark);
-    rightTrack.position.set(1.6, 0.4, 0);
+    rightTrack.position.set(1.6, 0.425, 0);
     rightTrack.castShadow = true;
     tank.add(rightTrack);
 
-    // Track side skirts
-    const skirtGeo = new THREE.BoxGeometry(0.06, 0.55, 5.6);
-    const lSkirt = new THREE.Mesh(skirtGeo, tankArmorDark);
-    lSkirt.position.set(-2.02, 0.5, 0);
+    // Track mudguards / side skirts (level & straight)
+    const trackGuardGeo = new THREE.BoxGeometry(0.9, 0.12, 6.2);
+    const lGuard = new THREE.Mesh(trackGuardGeo, tankArmorDark);
+    lGuard.position.set(-1.6, 0.9, 0);
+    tank.add(lGuard);
+    const rGuard = new THREE.Mesh(trackGuardGeo, tankArmorDark);
+    rGuard.position.set(1.6, 0.9, 0);
+    tank.add(rGuard);
+
+    // Outer side armor skirts (straight & level)
+    const skirtGeo = new THREE.BoxGeometry(0.06, 0.55, 5.8);
+    const lSkirt = new THREE.Mesh(skirtGeo, tankArmorTrim);
+    lSkirt.position.set(-2.06, 0.6, 0);
     tank.add(lSkirt);
-    const rSkirt = new THREE.Mesh(skirtGeo, tankArmorDark);
-    rSkirt.position.set(2.02, 0.5, 0);
+    const rSkirt = new THREE.Mesh(skirtGeo, tankArmorTrim);
+    rSkirt.position.set(2.06, 0.6, 0);
     tank.add(rSkirt);
 
-    // Main Hull lower
-    const hullGeo = new THREE.BoxGeometry(2.6, 0.7, 5.8);
-    const hull = new THREE.Mesh(hullGeo, tankArmorDark);
-    hull.position.set(0, 0.75, 0);
-    hull.castShadow = true;
-    tank.add(hull);
+    // 2. Main Hull (Straight, flat, solid)
+    // Lower hull
+    const hullLowerGeo = new THREE.BoxGeometry(2.35, 0.8, 6.0);
+    const hullLower = new THREE.Mesh(hullLowerGeo, tankArmorDark);
+    hullLower.position.set(0, 0.75, 0);
+    hullLower.castShadow = true;
+    tank.add(hullLower);
 
-    // Hull top plate (flat deck)
-    const deckGeo = new THREE.BoxGeometry(2.6, 0.2, 3.6);
-    const deck = new THREE.Mesh(deckGeo, tankArmorDark);
-    deck.position.set(0, 1.2, -0.8);
-    tank.add(deck);
+    // Upper hull deck (straight level rectangular box)
+    const hullDeckGeo = new THREE.BoxGeometry(2.35, 0.45, 5.8);
+    const hullDeck = new THREE.Mesh(hullDeckGeo, tankArmorDark);
+    hullDeck.position.set(0, 1.25, 0);
+    hullDeck.castShadow = true;
+    tank.add(hullDeck);
 
-    // Front glacis (sloped)
-    const glacisGeo = new THREE.BoxGeometry(2.58, 0.5, 1.8);
-    const glacis = new THREE.Mesh(glacisGeo, tankArmorDark);
-    glacis.position.set(0, 1.15, 1.8);
-    glacis.rotation.x = -Math.PI * 0.15;
-    glacis.castShadow = true;
-    tank.add(glacis);
+    // Front nose plate (straight level step, NO tilt)
+    const noseGeo = new THREE.BoxGeometry(2.34, 0.4, 0.5);
+    const nose = new THREE.Mesh(noseGeo, tankArmorTrim);
+    nose.position.set(0, 1.05, 3.0);
+    tank.add(nose);
 
-    // Turret
-    const turretGeo = new THREE.BoxGeometry(1.9, 0.8, 2.4);
+    // 3. Turret (Clean, low-profile battle tank turret)
+    const turretGeo = new THREE.BoxGeometry(2.2, 0.75, 2.8);
     const turret = new THREE.Mesh(turretGeo, tankArmorDark);
-    turret.position.set(0, 1.7, -0.2);
+    turret.position.set(0, 1.85, -0.2);
     turret.castShadow = true;
     tank.add(turret);
 
-    // Commander cupola
-    const cupolaGeo = new THREE.CylinderGeometry(0.35, 0.4, 0.25, 10);
-    const cupola = new THREE.Mesh(cupolaGeo, tankArmorTrim);
-    cupola.position.set(-0.45, 2.2, -0.4);
-    cupola.castShadow = true;
-    tank.add(cupola);
+    // Front turret mantlet block
+    const mantletBlock = new THREE.Mesh(
+      new THREE.BoxGeometry(1.2, 0.55, 0.6),
+      tankArmorTrim
+    );
+    mantletBlock.position.set(0, 1.85, 1.4);
+    mantletBlock.castShadow = true;
+    tank.add(mantletBlock);
 
-    // Mantlet (gun housing)
-    const mantletGeo = new THREE.BoxGeometry(0.8, 0.5, 0.5);
-    const mantlet = new THREE.Mesh(mantletGeo, tankArmorTrim);
-    mantlet.position.set(0, 1.7, 1.1);
-    mantlet.castShadow = true;
-    tank.add(mantlet);
-
-    // Barrel
-    const barrelGeo = new THREE.CylinderGeometry(0.12, 0.14, 4.0, 8);
+    // 4. Main Cannon Barrel (Straight horizontal cylinder pointing forward)
+    const barrelGeo = new THREE.CylinderGeometry(0.12, 0.14, 4.4, 10);
     barrelGeo.rotateX(Math.PI / 2);
     const barrel = new THREE.Mesh(barrelGeo, metalDark);
-    barrel.position.set(0, 1.7, 3.4);
+    barrel.position.set(0, 1.85, 3.8);
     barrel.castShadow = true;
     tank.add(barrel);
 
+    // Fume extractor thermal sleeve
+    const fumeGeo = new THREE.CylinderGeometry(0.18, 0.18, 0.85, 10);
+    fumeGeo.rotateX(Math.PI / 2);
+    const fume = new THREE.Mesh(fumeGeo, tankArmorTrim);
+    fume.position.set(0, 1.85, 3.5);
+    tank.add(fume);
+
     // Muzzle brake
-    const muzzleGeo = new THREE.CylinderGeometry(0.18, 0.18, 0.35, 8);
+    const muzzleGeo = new THREE.CylinderGeometry(0.17, 0.17, 0.35, 10);
     muzzleGeo.rotateX(Math.PI / 2);
-    const muzzleBrake = new THREE.Mesh(muzzleGeo, tankArmorTrim);
-    muzzleBrake.position.set(0, 1.7, 5.5);
-    tank.add(muzzleBrake);
+    const muzzle = new THREE.Mesh(muzzleGeo, tankArmorTrim);
+    muzzle.position.set(0, 1.85, 6.1);
+    tank.add(muzzle);
+
+    // 5. Turret Roof Equipment
+    // Commander's cupola
+    const cupola = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.35, 0.38, 0.22, 10),
+      tankArmorTrim
+    );
+    cupola.position.set(-0.55, 2.3, -0.4);
+    cupola.castShadow = true;
+    tank.add(cupola);
+
+    // Gunner's hatch
+    const gunnerHatch = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.3, 0.32, 0.12, 10),
+      tankArmorTrim
+    );
+    gunnerHatch.position.set(0.55, 2.25, -0.3);
+    tank.add(gunnerHatch);
+
+    // Machine gun on cupola (12.7mm)
+    const mgBarrel = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.02, 0.025, 0.9, 8),
+      metalDark
+    );
+    mgBarrel.rotateX(Math.PI / 2);
+    mgBarrel.position.set(-0.55, 2.5, 0.1);
+    tank.add(mgBarrel);
 
     // Radio antenna
-    const antGeo = new THREE.CylinderGeometry(0.015, 0.025, 2.2, 6);
-    const ant = new THREE.Mesh(antGeo, metalDark);
-    ant.position.set(0.6, 3.0, -0.7);
+    const ant = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.012, 0.02, 2.2, 6),
+      metalDark
+    );
+    ant.position.set(0.7, 3.1, -0.8);
     tank.add(ant);
 
-    // Rear fuel drums
+    // 6. Rear Engine Deck & External Fuel Drums
+    const stowageBox = new THREE.Mesh(
+      new THREE.BoxGeometry(1.8, 0.25, 0.5),
+      tankArmorTrim
+    );
+    stowageBox.position.set(0, 1.55, -2.4);
+    tank.add(stowageBox);
+
     const fuelGeo = new THREE.CylinderGeometry(0.28, 0.28, 0.9, 10);
     fuelGeo.rotateZ(Math.PI / 2);
     const fuel1 = new THREE.Mesh(fuelGeo, redBarrelMaterial);
-    fuel1.position.set(-0.7, 1.3, -2.7);
+    fuel1.position.set(-0.75, 1.35, -2.95);
     tank.add(fuel1);
     const fuel2 = new THREE.Mesh(fuelGeo, redBarrelMaterial);
-    fuel2.position.set(0.7, 1.3, -2.7);
+    fuel2.position.set(0.75, 1.35, -2.95);
     tank.add(fuel2);
 
     return tank;
@@ -924,16 +971,134 @@ export function createMilitaryRange(scene) {
     cab.receiveShadow = true;
     truck.add(cab);
 
-    // Windshield
-    const windshieldGeo = new THREE.BoxGeometry(2.1, 0.65, 0.05);
-    const glassMat = new THREE.MeshStandardMaterial({
-      color: 0x1a2b3c,
+    // Glass Material for all windows
+    const truckGlassMat = new THREE.MeshStandardMaterial({
+      color: 0x1f3344,
       roughness: 0.1,
-      metalness: 0.9,
+      metalness: 0.85,
+      transparent: true,
+      opacity: 0.75,
     });
-    const windshield = new THREE.Mesh(windshieldGeo, glassMat);
-    windshield.position.set(0, 2.05, 3.32);
-    truck.add(windshield);
+
+    // 1. Windshield (Front split dual-pane glass)
+    const windshieldGeo = new THREE.BoxGeometry(0.98, 0.62, 0.05);
+    const leftWindshield = new THREE.Mesh(windshieldGeo, truckGlassMat);
+    leftWindshield.position.set(-0.52, 2.05, 3.32);
+    truck.add(leftWindshield);
+
+    const rightWindshield = new THREE.Mesh(windshieldGeo, truckGlassMat);
+    rightWindshield.position.set(0.52, 2.05, 3.32);
+    truck.add(rightWindshield);
+
+    const centerPost = new THREE.Mesh(
+      new THREE.BoxGeometry(0.06, 0.65, 0.06),
+      tankArmorTrim
+    );
+    centerPost.position.set(0, 2.05, 3.33);
+    truck.add(centerPost);
+
+    // 2. Side Door Windows (Left & Right)
+    const sideWindowGeo = new THREE.BoxGeometry(0.05, 0.55, 0.85);
+    const lSideWin = new THREE.Mesh(sideWindowGeo, truckGlassMat);
+    lSideWin.position.set(-1.16, 2.05, 2.35);
+    truck.add(lSideWin);
+
+    const rSideWin = new THREE.Mesh(sideWindowGeo, truckGlassMat);
+    rSideWin.position.set(1.16, 2.05, 2.35);
+    truck.add(rSideWin);
+
+    // 3. Rear Cab Window
+    const rearWinGeo = new THREE.BoxGeometry(0.9, 0.45, 0.05);
+    const rearWin = new THREE.Mesh(rearWinGeo, truckGlassMat);
+    rearWin.position.set(0, 2.05, 1.09);
+    truck.add(rearWin);
+
+    // 4. Door Handles (Left & Right)
+    const handleMat = metalDark;
+    for (const hx of [-1.17, 1.17]) {
+      const handleBase = new THREE.Mesh(
+        new THREE.BoxGeometry(0.03, 0.05, 0.18),
+        tankArmorTrim
+      );
+      handleBase.position.set(hx, 1.55, 1.95);
+      truck.add(handleBase);
+
+      const handleBar = new THREE.Mesh(
+        new THREE.BoxGeometry(0.04, 0.025, 0.14),
+        handleMat
+      );
+      handleBar.position.set(hx < 0 ? hx - 0.02 : hx + 0.02, 1.55, 1.95);
+      truck.add(handleBar);
+    }
+
+    // 5. Side Mirrors (Left & Right)
+    for (const mx of [-1.35, 1.35]) {
+      const bracket = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.015, 0.015, 0.25, 6),
+        handleMat
+      );
+      bracket.rotateZ(Math.PI / 2);
+      bracket.position.set(mx > 0 ? 1.25 : -1.25, 2.0, 3.0);
+      truck.add(bracket);
+
+      const mirror = new THREE.Mesh(
+        new THREE.BoxGeometry(0.05, 0.35, 0.18),
+        handleMat
+      );
+      mirror.position.set(mx, 2.0, 3.0);
+      truck.add(mirror);
+
+      const mirrorGlass = new THREE.Mesh(
+        new THREE.BoxGeometry(0.01, 0.32, 0.16),
+        truckGlassMat
+      );
+      mirrorGlass.position.set(mx > 0 ? mx - 0.025 : mx + 0.025, 2.0, 3.0);
+      truck.add(mirrorGlass);
+    }
+
+    // 6. Front Grille, Bumper & Headlights
+    const bumper = new THREE.Mesh(
+      new THREE.BoxGeometry(2.4, 0.35, 0.3),
+      metalDark
+    );
+    bumper.position.set(0, 0.8, 3.45);
+    bumper.castShadow = true;
+    truck.add(bumper);
+
+    // Headlights
+    const lightMat = new THREE.MeshStandardMaterial({
+      color: 0xfff2b0,
+      emissive: 0xffeeaa,
+      emissiveIntensity: 0.3,
+      roughness: 0.2,
+    });
+    for (const lx of [-0.85, 0.85]) {
+      const light = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.12, 0.12, 0.06, 12),
+        lightMat
+      );
+      light.rotateX(Math.PI / 2);
+      light.position.set(lx, 0.8, 3.61);
+      truck.add(light);
+    }
+
+    // Radiator grille
+    const grille = new THREE.Mesh(
+      new THREE.BoxGeometry(1.1, 0.5, 0.05),
+      metalDark
+    );
+    grille.position.set(0, 1.45, 3.32);
+    truck.add(grille);
+
+    // Door footsteps under cab
+    for (const sx of [-1.22, 1.22]) {
+      const step = new THREE.Mesh(
+        new THREE.BoxGeometry(0.2, 0.04, 0.45),
+        metalDark
+      );
+      step.position.set(sx, 0.7, 2.1);
+      truck.add(step);
+    }
 
     // Flatbed Cargo Area
     const flatbedGeo = new THREE.BoxGeometry(2.4, 0.3, 4.4);
