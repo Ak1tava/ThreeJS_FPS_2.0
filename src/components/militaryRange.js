@@ -871,6 +871,691 @@ export function createMilitaryRange(scene) {
   createCzechHedgehog(14, -28);
   createCzechHedgehog(10, -30);
 
+  // ==========================================
+  // 8. FIGHTER JET (СУ-30 / МИГ-29 СТИЛЬ) & KAZAKHSTAN FLAG
+  // ==========================================
+
+  // Canvas texture generator for Kazakhstan Flag
+  function createKazakhstanFlagCanvasTexture() {
+    const canvas = document.createElement("canvas");
+    canvas.width = 1024;
+    canvas.height = 512;
+    const ctx = canvas.getContext("2d");
+
+    // Official Kazakhstan sky blue (Pantone 3125 C)
+    ctx.fillStyle = "#00afca";
+    ctx.fillRect(0, 0, 1024, 512);
+
+    // Official national gold (Pantone 102 C)
+    const goldColor = "#fec50c";
+    ctx.fillStyle = goldColor;
+    ctx.strokeStyle = goldColor;
+
+    // --- 1. Traditional National Ornament "Koshkar-Muiz" on hoist (left) side ---
+    const ornX = 64;
+    const ornWidth = 48;
+    ctx.lineWidth = 10;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+
+    // Draw vertical spine band
+    ctx.beginPath();
+    ctx.moveTo(ornX, 10);
+    ctx.lineTo(ornX, 502);
+    ctx.stroke();
+
+    // Repeating symmetrical ram horn spirals
+    const numUnits = 5;
+    const unitHeight = 512 / numUnits;
+    for (let u = 0; u < numUnits; u++) {
+      const cy = u * unitHeight + unitHeight / 2;
+      
+      // Upper curl left & right
+      ctx.beginPath();
+      ctx.arc(ornX - 22, cy - 20, 16, 0, Math.PI * 1.5, false);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(ornX + 22, cy - 20, 16, -Math.PI * 0.5, Math.PI, false);
+      ctx.stroke();
+
+      // Lower curl left & right
+      ctx.beginPath();
+      ctx.arc(ornX - 22, cy + 20, 16, 0, Math.PI * 1.5, true);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(ornX + 22, cy + 20, 16, -Math.PI * 0.5, Math.PI, true);
+      ctx.stroke();
+
+      // Center diamond node
+      ctx.beginPath();
+      ctx.moveTo(ornX, cy - 14);
+      ctx.lineTo(ornX + 12, cy);
+      ctx.lineTo(ornX, cy + 14);
+      ctx.lineTo(ornX - 12, cy);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    // --- 2. Golden Sun with 32 Rays in Center ---
+    const sunX = 570;
+    const sunY = 200;
+    const sunRadius = 65;
+
+    // Sun core disc
+    ctx.beginPath();
+    ctx.arc(sunX, sunY, sunRadius, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 32 pointed triangular rays
+    const numRays = 32;
+    const rayInnerRadius = sunRadius + 6;
+    const rayOuterRadius = sunRadius + 44;
+    for (let i = 0; i < numRays; i++) {
+      const angle = (i * Math.PI * 2) / numRays;
+      const angleLeft = angle - (Math.PI / numRays) * 0.65;
+      const angleRight = angle + (Math.PI / numRays) * 0.65;
+
+      const tipX = sunX + Math.cos(angle) * rayOuterRadius;
+      const tipY = sunY + Math.sin(angle) * rayOuterRadius;
+      const baseLeftX = sunX + Math.cos(angleLeft) * rayInnerRadius;
+      const baseLeftY = sunY + Math.sin(angleLeft) * rayInnerRadius;
+      const baseRightX = sunX + Math.cos(angleRight) * rayInnerRadius;
+      const baseRightY = sunY + Math.sin(angleRight) * rayInnerRadius;
+
+      ctx.beginPath();
+      ctx.moveTo(tipX, tipY);
+      ctx.lineTo(baseLeftX, baseLeftY);
+      ctx.lineTo(baseRightX, baseRightY);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    // --- 3. Soaring Steppe Eagle under the Sun ---
+    const eagleY = 345;
+    ctx.beginPath();
+    // Head with beak pointing to the hoist side (left)
+    ctx.moveTo(sunX - 14, eagleY - 24);
+    ctx.lineTo(sunX - 28, eagleY - 20); // sharp beak tip
+    ctx.lineTo(sunX - 18, eagleY - 14);
+    ctx.lineTo(sunX - 6, eagleY - 8);
+
+    // Left sweeping wing (curving up and out)
+    ctx.quadraticCurveTo(sunX - 80, eagleY - 45, sunX - 140, eagleY - 65);
+    // Left wingtip primary feathers
+    ctx.lineTo(sunX - 134, eagleY - 50);
+    ctx.lineTo(sunX - 150, eagleY - 58);
+    ctx.lineTo(sunX - 138, eagleY - 40);
+    ctx.lineTo(sunX - 145, eagleY - 44);
+    // Lower curve of left wing back to body
+    ctx.quadraticCurveTo(sunX - 80, eagleY - 15, sunX - 16, eagleY + 12);
+
+    // Tail feathers fanning downward
+    ctx.lineTo(sunX - 22, eagleY + 54);
+    ctx.lineTo(sunX - 8, eagleY + 48);
+    ctx.lineTo(sunX, eagleY + 58);
+    ctx.lineTo(sunX + 8, eagleY + 48);
+    ctx.lineTo(sunX + 22, eagleY + 54);
+
+    // Lower curve of right wing
+    ctx.lineTo(sunX + 16, eagleY + 12);
+    ctx.quadraticCurveTo(sunX + 80, eagleY - 15, sunX + 145, eagleY - 44);
+    // Right wingtip primary feathers
+    ctx.lineTo(sunX + 138, eagleY - 40);
+    ctx.lineTo(sunX + 150, eagleY - 58);
+    ctx.lineTo(sunX + 134, eagleY - 50);
+    ctx.lineTo(sunX + 140, eagleY - 65);
+    // Upper curve of right wing back to neck
+    ctx.quadraticCurveTo(sunX + 80, eagleY - 45, sunX + 6, eagleY - 18);
+    ctx.closePath();
+    ctx.fill();
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.anisotropy = 4;
+    return texture;
+  }
+
+  // Helper for Kazakhstan Air Force roundel on fighter jet
+  function createKazakhAirForceRoundel() {
+    const canvas = document.createElement("canvas");
+    canvas.width = 128;
+    canvas.height = 128;
+    const ctx = canvas.getContext("2d");
+
+    // Outer sky blue ring
+    ctx.fillStyle = "#00afca";
+    ctx.beginPath();
+    ctx.arc(64, 64, 60, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Red star
+    ctx.fillStyle = "#d92b2b";
+    ctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const aOuter = (i * Math.PI * 2) / 5 - Math.PI / 2;
+      const aInner = aOuter + Math.PI / 5;
+      const xo = 64 + Math.cos(aOuter) * 52;
+      const yo = 64 + Math.sin(aOuter) * 52;
+      const xi = 64 + Math.cos(aInner) * 22;
+      const yi = 64 + Math.sin(aInner) * 22;
+      if (i === 0) ctx.moveTo(xo, yo);
+      else ctx.lineTo(xo, yo);
+      ctx.lineTo(xi, yi);
+    }
+    ctx.closePath();
+    ctx.fill();
+
+    // Center gold sun
+    ctx.fillStyle = "#fec50c";
+    ctx.beginPath();
+    ctx.arc(64, 64, 16, 0, Math.PI * 2);
+    ctx.fill();
+
+    return new THREE.CanvasTexture(canvas);
+  }
+
+  // Fighter Jet (Su-30 / MiG-29 Air Superiority Fighter)
+  function createFighterJet(x, y, z, rotY = 0) {
+    const jet = new THREE.Group();
+    jet.position.set(x, y, z);
+    jet.rotation.y = rotY;
+
+    // Aircraft materials
+    const camoBodyMat = new THREE.MeshStandardMaterial({
+      color: 0x58697a, // Air Superiority Grey-Blue
+      roughness: 0.45,
+      metalness: 0.35,
+    });
+
+    const camoUpperMat = new THREE.MeshStandardMaterial({
+      color: 0x415263, // Darker camouflage blotches
+      roughness: 0.5,
+      metalness: 0.3,
+    });
+
+    const radomeMat = new THREE.MeshStandardMaterial({
+      color: 0x22262a, // Dark composite dielectric radome nose
+      roughness: 0.7,
+      metalness: 0.1,
+    });
+
+    const cockpitCanopyMat = new THREE.MeshStandardMaterial({
+      color: 0x0e1b26, // Reflective tinted cockpit glass
+      roughness: 0.08,
+      metalness: 0.95,
+    });
+
+    const titaniumNozzleMat = new THREE.MeshStandardMaterial({
+      color: 0x1f2022, // Burnt titanium jet exhausts
+      roughness: 0.3,
+      metalness: 0.9,
+    });
+
+    const missileWhiteMat = new THREE.MeshStandardMaterial({
+      color: 0xe8eaed,
+      roughness: 0.4,
+    });
+
+    const missileFinMat = new THREE.MeshStandardMaterial({
+      color: 0x333333,
+      roughness: 0.5,
+    });
+
+    const roundelMat = new THREE.MeshStandardMaterial({
+      map: createKazakhAirForceRoundel(),
+      roughness: 0.5,
+      transparent: true,
+    });
+
+    // 0. Concrete Parking Hardstand / Apron underneath
+    const apronGeo = new THREE.BoxGeometry(18, 0.1, 20);
+    const apronMat = new THREE.MeshStandardMaterial({
+      color: 0x7a7f85,
+      roughness: 0.9,
+      metalness: 0.1,
+    });
+    const apron = new THREE.Mesh(apronGeo, apronMat);
+    apron.position.set(0, 0.05, 0);
+    apron.receiveShadow = true;
+    jet.add(apron);
+
+    // Yellow taxiway line on concrete
+    const lineGeo = new THREE.BoxGeometry(0.35, 0.11, 16);
+    const lineMat = new THREE.MeshStandardMaterial({
+      color: 0xf5b700,
+      roughness: 0.6,
+    });
+    const taxiLine = new THREE.Mesh(lineGeo, lineMat);
+    taxiLine.position.set(0, 0.06, 0);
+    jet.add(taxiLine);
+
+    // 1. Central Fuselage & Blended Body (Y = 1.95m above ground)
+    const bodyGeo = new THREE.BoxGeometry(2.3, 0.85, 8.4);
+    const body = new THREE.Mesh(bodyGeo, camoBodyMat);
+    body.position.set(0, 1.95, 0);
+    body.castShadow = true;
+    body.receiveShadow = true;
+    jet.add(body);
+
+    // Upper spine / dorsal ridge
+    const spineGeo = new THREE.BoxGeometry(1.2, 0.45, 6.0);
+    const spine = new THREE.Mesh(spineGeo, camoUpperMat);
+    spine.position.set(0, 2.5, 0.5);
+    spine.castShadow = true;
+    jet.add(spine);
+
+    // Forward fuselage tapering towards cockpit
+    const forwardBodyGeo = new THREE.BoxGeometry(1.7, 0.75, 3.2);
+    const forwardBody = new THREE.Mesh(forwardBodyGeo, camoBodyMat);
+    forwardBody.position.set(0, 1.95, -4.8);
+    forwardBody.castShadow = true;
+    jet.add(forwardBody);
+
+    // Aerodynamic Radome Nose Cone
+    const noseGeo = new THREE.ConeGeometry(0.65, 3.0, 16);
+    noseGeo.rotateX(-Math.PI / 2);
+    const nose = new THREE.Mesh(noseGeo, radomeMat);
+    nose.position.set(0, 1.95, -7.9);
+    nose.castShadow = true;
+    jet.add(nose);
+
+    // Pitot probe needle on nose
+    const pitotGeo = new THREE.CylinderGeometry(0.015, 0.03, 1.6, 8);
+    pitotGeo.rotateX(Math.PI / 2);
+    const pitot = new THREE.Mesh(pitotGeo, metalDark);
+    pitot.position.set(0, 1.95, -9.8);
+    jet.add(pitot);
+
+    // 2. Cockpit Canopy & Interior
+    const canopyGeo = new THREE.CapsuleGeometry(0.5, 1.9, 8, 16);
+    canopyGeo.rotateX(Math.PI / 2);
+    const canopy = new THREE.Mesh(canopyGeo, cockpitCanopyMat);
+    canopy.position.set(0, 2.65, -3.8);
+    canopy.rotation.x = 0.05;
+    canopy.castShadow = true;
+    jet.add(canopy);
+
+    // Ejection seat silhouette inside canopy
+    const seatGeo = new THREE.BoxGeometry(0.38, 0.65, 0.35);
+    const seat = new THREE.Mesh(seatGeo, metalDark);
+    seat.position.set(0, 2.5, -3.6);
+    jet.add(seat);
+
+    // 3. Leading-Edge Root Extensions (LERX / Strakes)
+    const lerxGeo = new THREE.BoxGeometry(1.2, 0.15, 4.2);
+    const leftLerx = new THREE.Mesh(lerxGeo, camoBodyMat);
+    leftLerx.position.set(-1.45, 1.95, -2.4);
+    leftLerx.rotation.y = 0.18;
+    jet.add(leftLerx);
+
+    const rightLerx = new THREE.Mesh(lerxGeo, camoBodyMat);
+    rightLerx.position.set(1.45, 1.95, -2.4);
+    rightLerx.rotation.y = -0.18;
+    jet.add(rightLerx);
+
+    // 4. Swept Main Wings (Wingspan 11.6m)
+    function createWing(isLeft) {
+      const wingGroup = new THREE.Group();
+      const sign = isLeft ? -1 : 1;
+
+      // Main swept wing panel
+      const wingGeo = new THREE.BoxGeometry(4.6, 0.14, 3.8);
+      const wing = new THREE.Mesh(wingGeo, camoBodyMat);
+      wing.position.set(sign * 3.2, 1.95, 0.2);
+      wing.rotation.y = -sign * 0.35;
+      wing.castShadow = true;
+      wing.receiveShadow = true;
+      wingGroup.add(wing);
+
+      // Kazakh Air Force roundel on upper wing surface
+      const roundel = new THREE.Mesh(
+        new THREE.PlaneGeometry(1.2, 1.2),
+        roundelMat
+      );
+      roundel.rotation.x = -Math.PI / 2;
+      roundel.position.set(sign * 3.4, 2.03, 0.2);
+      wingGroup.add(roundel);
+
+      // Wingtip missile launch rail
+      const railGeo = new THREE.BoxGeometry(0.12, 0.14, 2.6);
+      const rail = new THREE.Mesh(railGeo, camoUpperMat);
+      rail.position.set(sign * 5.6, 1.95, 0.8);
+      wingGroup.add(rail);
+
+      // Wingtip Air-to-Air Missile (R-73 style)
+      const missileBodyGeo = new THREE.CylinderGeometry(0.08, 0.08, 2.4, 12);
+      missileBodyGeo.rotateX(Math.PI / 2);
+      const missile = new THREE.Mesh(missileBodyGeo, missileWhiteMat);
+      missile.position.set(sign * 5.6, 1.88, 0.8);
+
+      // Missile fins
+      const finGeo = new THREE.BoxGeometry(0.45, 0.02, 0.25);
+      const finH = new THREE.Mesh(finGeo, missileFinMat);
+      finH.position.set(0, 0, 0.9);
+      missile.add(finH);
+      const finV = new THREE.Mesh(finGeo, missileFinMat);
+      finV.rotation.z = Math.PI / 2;
+      finV.position.set(0, 0, 0.9);
+      missile.add(finV);
+      wingGroup.add(missile);
+
+      // Mid-wing Pylon with Heavy Missile (R-27 style)
+      const pylonGeo = new THREE.BoxGeometry(0.12, 0.25, 1.8);
+      const pylon = new THREE.Mesh(pylonGeo, camoUpperMat);
+      pylon.position.set(sign * 3.1, 1.75, 0.2);
+      wingGroup.add(pylon);
+
+      const heavyMissileGeo = new THREE.CylinderGeometry(0.12, 0.12, 3.2, 12);
+      heavyMissileGeo.rotateX(Math.PI / 2);
+      const heavyMissile = new THREE.Mesh(heavyMissileGeo, missileWhiteMat);
+      heavyMissile.position.set(sign * 3.1, 1.55, 0.2);
+      
+      const heavyFin = new THREE.Mesh(
+        new THREE.BoxGeometry(0.65, 0.02, 0.45),
+        missileFinMat
+      );
+      heavyFin.position.set(0, 0, 0.3);
+      heavyMissile.add(heavyFin);
+      wingGroup.add(heavyMissile);
+
+      return wingGroup;
+    }
+
+    jet.add(createWing(true));
+    jet.add(createWing(false));
+
+    // 5. Twin Canted Vertical Stabilizers (Iconic Twin Tails)
+    function createTailFin(isLeft) {
+      const sign = isLeft ? -1 : 1;
+      const finGroup = new THREE.Group();
+      finGroup.position.set(sign * 1.35, 2.4, 2.4);
+
+      // Slanted outward ~8 degrees
+      finGroup.rotation.z = -sign * 0.14;
+
+      const finGeo = new THREE.BoxGeometry(0.16, 2.5, 1.9);
+      const fin = new THREE.Mesh(finGeo, camoBodyMat);
+      fin.position.set(0, 1.15, 0);
+      fin.rotation.x = -0.32; // Swept back
+      fin.castShadow = true;
+      finGroup.add(fin);
+
+      // Kazakh Air Force roundel on tail
+      const tailRoundel = new THREE.Mesh(
+        new THREE.PlaneGeometry(0.85, 0.85),
+        roundelMat
+      );
+      tailRoundel.rotation.y = sign * (Math.PI / 2);
+      tailRoundel.position.set(sign * 0.09, 1.2, 0.1);
+      finGroup.add(tailRoundel);
+
+      return finGroup;
+    }
+
+    jet.add(createTailFin(true));
+    jet.add(createTailFin(false));
+
+    // 6. Horizontal Stabilators (All-moving tailplanes)
+    const stabGeo = new THREE.BoxGeometry(2.2, 0.1, 1.8);
+    const leftStab = new THREE.Mesh(stabGeo, camoBodyMat);
+    leftStab.position.set(-2.0, 1.95, 3.8);
+    leftStab.rotation.y = -0.35;
+    leftStab.castShadow = true;
+    jet.add(leftStab);
+
+    const rightStab = new THREE.Mesh(stabGeo, camoBodyMat);
+    rightStab.position.set(2.0, 1.95, 3.8);
+    rightStab.rotation.y = 0.35;
+    rightStab.castShadow = true;
+    jet.add(rightStab);
+
+    // 7. Twin Jet Engines & Afterburner Nozzles
+    for (const sx of [-0.85, 0.85]) {
+      // Nacelle underside trunk
+      const nacelleGeo = new THREE.CylinderGeometry(0.55, 0.58, 4.4, 16);
+      nacelleGeo.rotateX(Math.PI / 2);
+      const nacelle = new THREE.Mesh(nacelleGeo, camoBodyMat);
+      nacelle.position.set(sx, 1.55, 1.8);
+      nacelle.castShadow = true;
+      jet.add(nacelle);
+
+      // Intake ramp under wing root
+      const intakeGeo = new THREE.BoxGeometry(0.95, 0.65, 2.4);
+      const intake = new THREE.Mesh(intakeGeo, camoUpperMat);
+      intake.position.set(sx, 1.55, -0.9);
+      jet.add(intake);
+
+      // Black intake opening
+      const openingGeo = new THREE.BoxGeometry(0.85, 0.55, 0.1);
+      const opening = new THREE.Mesh(openingGeo, metalDark);
+      opening.position.set(sx, 1.55, -2.12);
+      jet.add(opening);
+
+      // Exhaust Nozzle (Reheat / Afterburner titanium ring)
+      const nozzleGeo = new THREE.CylinderGeometry(0.52, 0.46, 1.2, 16);
+      nozzleGeo.rotateX(Math.PI / 2);
+      const nozzle = new THREE.Mesh(nozzleGeo, titaniumNozzleMat);
+      nozzle.position.set(sx, 1.55, 4.4);
+      nozzle.castShadow = true;
+      jet.add(nozzle);
+    }
+
+    // 8. Sturdy Three-Point Landing Gear
+    const strutMat = new THREE.MeshStandardMaterial({
+      color: 0x888888,
+      metalness: 0.7,
+      roughness: 0.3,
+    });
+    const tireMat = new THREE.MeshStandardMaterial({
+      color: 0x181818,
+      roughness: 0.9,
+    });
+
+    // Front nose gear (under forward cockpit)
+    const noseStrut = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.06, 0.08, 1.4, 8),
+      strutMat
+    );
+    noseStrut.position.set(0, 0.75, -4.8);
+    jet.add(noseStrut);
+
+    // Front dual tires
+    const frontWheelGeo = new THREE.CylinderGeometry(0.25, 0.25, 0.14, 12);
+    frontWheelGeo.rotateZ(Math.PI / 2);
+    const fwL = new THREE.Mesh(frontWheelGeo, tireMat);
+    fwL.position.set(-0.12, 0.25, -4.8);
+    fwL.castShadow = true;
+    jet.add(fwL);
+    const fwR = new THREE.Mesh(frontWheelGeo, tireMat);
+    fwR.position.set(0.12, 0.25, -4.8);
+    fwR.castShadow = true;
+    jet.add(fwR);
+
+    // Main gear (left & right under wing roots)
+    for (const gx of [-1.55, 1.55]) {
+      const mainStrut = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.1, 0.12, 1.5, 8),
+        strutMat
+      );
+      mainStrut.position.set(gx, 0.75, 0.6);
+      jet.add(mainStrut);
+
+      const mainWheelGeo = new THREE.CylinderGeometry(0.42, 0.42, 0.25, 14);
+      mainWheelGeo.rotateZ(Math.PI / 2);
+      const mw = new THREE.Mesh(mainWheelGeo, tireMat);
+      mw.position.set(gx, 0.42, 0.6);
+      mw.castShadow = true;
+      jet.add(mw);
+
+      // Yellow wheel chocks on main tires
+      const chockGeo = new THREE.BoxGeometry(0.3, 0.18, 0.25);
+      const chockMat = new THREE.MeshStandardMaterial({
+        color: 0xf5b700,
+        roughness: 0.6,
+      });
+      const chockF = new THREE.Mesh(chockGeo, chockMat);
+      chockF.position.set(gx, 0.1, 0.95);
+      jet.add(chockF);
+
+      const chockR = new THREE.Mesh(chockGeo, chockMat);
+      chockR.position.set(gx, 0.1, 0.25);
+      jet.add(chockR);
+    }
+
+    // 9. Ground Maintenance Crew Access Ladder (Yellow steel)
+    const ladderGroup = new THREE.Group();
+    ladderGroup.position.set(-1.1, 0, -3.4);
+    ladderGroup.rotation.y = 0.35;
+    ladderGroup.rotation.z = -0.18;
+
+    const yellowMat = new THREE.MeshStandardMaterial({
+      color: 0xf0b800,
+      roughness: 0.5,
+      metalness: 0.3,
+    });
+    const railGeo = new THREE.CylinderGeometry(0.025, 0.025, 2.6, 6);
+    const leftRail = new THREE.Mesh(railGeo, yellowMat);
+    leftRail.position.set(-0.25, 1.25, 0);
+    ladderGroup.add(leftRail);
+
+    const rightRail = new THREE.Mesh(railGeo, yellowMat);
+    rightRail.position.set(0.25, 1.25, 0);
+    ladderGroup.add(rightRail);
+
+    const rungGeo = new THREE.CylinderGeometry(0.018, 0.018, 0.5, 6);
+    rungGeo.rotateZ(Math.PI / 2);
+    for (let ry = 0.3; ry <= 2.3; ry += 0.35) {
+      const rung = new THREE.Mesh(rungGeo, yellowMat);
+      rung.position.set(0, ry, 0);
+      ladderGroup.add(rung);
+    }
+    jet.add(ladderGroup);
+
+    return jet;
+  }
+
+  // Majestic Kazakhstan Flag on 16m Flagpole
+  function createKazakhstanFlagpole(x, z, angleTowardsRange = Math.PI * 0.38) {
+    const flagRoot = new THREE.Group();
+    flagRoot.position.set(x, 0, z);
+
+    // 1. Concrete Monument Pedestal at base
+    const baseMat = new THREE.MeshStandardMaterial({
+      color: 0x4a4f54,
+      roughness: 0.8,
+      metalness: 0.2,
+    });
+    const pedestalGeo = new THREE.CylinderGeometry(1.6, 1.9, 0.45, 12);
+    const pedestal = new THREE.Mesh(pedestalGeo, baseMat);
+    pedestal.position.y = 0.225;
+    pedestal.receiveShadow = true;
+    pedestal.castShadow = true;
+    flagRoot.add(pedestal);
+
+    // Polished steel collar
+    const collarMat = new THREE.MeshStandardMaterial({
+      color: 0xcccccc,
+      metalness: 0.85,
+      roughness: 0.2,
+    });
+    const collar = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.45, 0.65, 0.4, 16),
+      collarMat
+    );
+    collar.position.y = 0.55;
+    flagRoot.add(collar);
+
+    // 2. Tapered 16-Meter Steel Mast / Flagpole
+    const poleHeight = 16.0;
+    const poleGeo = new THREE.CylinderGeometry(0.08, 0.22, poleHeight, 16);
+    const poleMat = new THREE.MeshStandardMaterial({
+      color: 0xd8dde2,
+      metalness: 0.88,
+      roughness: 0.18,
+    });
+    const pole = new THREE.Mesh(poleGeo, poleMat);
+    pole.position.y = poleHeight / 2 + 0.45;
+    pole.castShadow = true;
+    flagRoot.add(pole);
+
+    // Halyard cable running along pole
+    const cableGeo = new THREE.CylinderGeometry(0.008, 0.008, poleHeight, 4);
+    const cableMat = new THREE.MeshStandardMaterial({
+      color: 0x222222,
+      roughness: 0.8,
+    });
+    const cable = new THREE.Mesh(cableGeo, cableMat);
+    cable.position.set(0.16, poleHeight / 2 + 0.45, 0);
+    flagRoot.add(cable);
+
+    // 3. Polished Golden Finial Ball on Top
+    const goldBallMat = new THREE.MeshStandardMaterial({
+      color: 0xfec50c,
+      metalness: 0.95,
+      roughness: 0.15,
+    });
+    const topBall = new THREE.Mesh(
+      new THREE.SphereGeometry(0.35, 20, 20),
+      goldBallMat
+    );
+    topBall.position.y = poleHeight + 0.65;
+    topBall.castShadow = true;
+    flagRoot.add(topBall);
+
+    // 4. Kazakhstan National Flag Cloth (5.6m x 2.8m, waving in the wind)
+    const flagWidth = 5.6;
+    const flagHeight = 2.8;
+    const flagGeo = new THREE.PlaneGeometry(flagWidth, flagHeight, 28, 14);
+
+    // Offset geometry origin so the left hoist edge aligns directly with the pole
+    flagGeo.translate(flagWidth / 2, 0, 0);
+
+    // Realistic wind flutter deformation (amplitude grows toward free edge)
+    const pos = flagGeo.attributes.position;
+    for (let i = 0; i < pos.count; i++) {
+      const px = pos.getX(i);
+      const py = pos.getY(i);
+      const t = Math.min(1.0, px / flagWidth); // 0 at mast, 1 at free end
+      const wave =
+        Math.sin(px * 1.6 - py * 0.4) * 0.32 * t +
+        Math.cos(px * 3.2 + py * 1.4) * 0.14 * (t * t);
+      pos.setZ(i, wave);
+    }
+    flagGeo.computeVertexNormals();
+
+    const flagTexture = createKazakhstanFlagCanvasTexture();
+    const flagMat = new THREE.MeshStandardMaterial({
+      map: flagTexture,
+      side: THREE.DoubleSide,
+      roughness: 0.7,
+      metalness: 0.1,
+    });
+
+    const flagMesh = new THREE.Mesh(flagGeo, flagMat);
+    flagMesh.castShadow = true;
+    flagMesh.receiveShadow = true;
+
+    // Place flag near the top of the mast (attached from Y = 13.0m to 15.8m)
+    const flagGroup = new THREE.Group();
+    flagGroup.position.set(0.12, poleHeight - 1.6, 0);
+
+    // Orient flag so its full broadside face directly greets anyone in the polygon center
+    flagGroup.rotation.y = angleTowardsRange;
+    flagGroup.add(flagMesh);
+
+    flagRoot.add(flagGroup);
+    return flagRoot;
+  }
+
+  // Place Fighter Jet on the left flank of the training range
+  // Parked on South Sector concrete pad at X = -32, Z = 6, angled toward center
+  militaryWorld.add(createFighterJet(-32, 0, 6, Math.PI * 0.35));
+
+  // Place Kazakhstan Flag to the LEFT of the Fighter Jet (further out at X = -46, Z = 6)
+  // Mast stands 16m high and flag is angled so it is clearly visible from polygon center!
+  militaryWorld.add(createKazakhstanFlagpole(-46, 6, Math.PI * 0.38));
+
   // Apply shadow flags to all meshes
   militaryWorld.traverse((child) => {
     if (child.isMesh) {
