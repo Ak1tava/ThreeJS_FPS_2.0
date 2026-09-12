@@ -93,17 +93,17 @@ function setupControls(
     }
     isSprinting = wantSprint;
 
-    // Camera FOV effect when sprinting (sensation of speed)
-    const targetFov = isSprinting ? 80 : 70;
-    if (Math.abs(camera.fov - targetFov) > 0.1) {
-      camera.fov = THREE.MathUtils.lerp(camera.fov, targetFov, 0.12);
+    // Camera FOV effect when sprinting (subtle sensation of speed)
+    const targetFov = isSprinting ? 75 : 70;
+    if (Math.abs(camera.fov - targetFov) > 0.05) {
+      camera.fov = THREE.MathUtils.lerp(camera.fov, targetFov, 0.08);
       camera.updateProjectionMatrix();
     }
 
-    // Speed calculation
-    let currentSpeed = 25; // Normal walking speed
+    // Speed calculation: normal walk = 25, sprint on Shift = 40
+    let currentSpeed = 25;
     if (isSprinting) {
-      currentSpeed = 55; // Fast sprint speed (2.2x!)
+      currentSpeed = 40; // Sprint speed as requested
     } else if (isCrouching) {
       currentSpeed = 13; // Slower crouch crawl
     }

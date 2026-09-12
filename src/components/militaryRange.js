@@ -247,14 +247,39 @@ export function createMilitaryRange(scene) {
   });
 
   // ==========================================
-  // 1. TERRAIN & BOUNDARIES (140x140m)
   // ==========================================
-  const groundGeo = new THREE.PlaneGeometry(140, 140, 32, 32);
-  const ground = new THREE.Mesh(groundGeo, groundMaterial);
-  ground.rotation.x = -Math.PI / 2;
-  ground.position.y = 0;
-  ground.receiveShadow = true;
-  militaryWorld.add(ground);
+  // 1. TERRAIN WITH REAL EXCAVATED TRENCH (140x140m)
+  // ==========================================
+  // Ground is split into 4 segments around the central trench (X: -24 to 24, Z: -12.5 to -8.5)
+  // leaving an actual open chasm 1.8 meters deep below ground level!
+
+  // South Sector (Behind the trench, including player spawn)
+  const groundSouthGeo = new THREE.BoxGeometry(140, 1.0, 76.5);
+  const groundSouth = new THREE.Mesh(groundSouthGeo, groundMaterial);
+  groundSouth.position.set(0, -0.5, 29.75);
+  groundSouth.receiveShadow = true;
+  militaryWorld.add(groundSouth);
+
+  // North Sector (Target range in front of the trench)
+  const groundNorthGeo = new THREE.BoxGeometry(140, 1.0, 55.5);
+  const groundNorth = new THREE.Mesh(groundNorthGeo, groundMaterial);
+  groundNorth.position.set(0, -0.5, -40.25);
+  groundNorth.receiveShadow = true;
+  militaryWorld.add(groundNorth);
+
+  // West Flank Ground (Left of trench)
+  const groundWestGeo = new THREE.BoxGeometry(46, 1.0, 4.0);
+  const groundWest = new THREE.Mesh(groundWestGeo, groundMaterial);
+  groundWest.position.set(-47, -0.5, -10.5);
+  groundWest.receiveShadow = true;
+  militaryWorld.add(groundWest);
+
+  // East Flank Ground (Right of trench)
+  const groundEastGeo = new THREE.BoxGeometry(46, 1.0, 4.0);
+  const groundEast = new THREE.Mesh(groundEastGeo, groundMaterial);
+  groundEast.position.set(47, -0.5, -10.5);
+  groundEast.receiveShadow = true;
+  militaryWorld.add(groundEast);
 
   // Outer boundary earthen berms / walls (keeps player on range)
   const bermMaterial = new THREE.MeshStandardMaterial({
@@ -272,16 +297,20 @@ export function createMilitaryRange(scene) {
     militaryWorld.add(berm);
   }
 
-  // Four boundary walls (North, South, East, West)
   createBerm(140, 5, 4, 0, -68);
   createBerm(140, 5, 4, 0, 68);
   createBerm(4, 5, 140, -68, 0);
   createBerm(4, 5, 140, 68, 0);
 
   // ==========================================
-  // 2. TRENCH NETWORK (ОКОПЫ: ЦЕНТР И ФЛАНГИ)
+  // 2. SUNKEN TRENCH (DEEPLY EXCAVATED: 1.8M DEEP)
   // ==========================================
   const trenchGroup = new THREE.Group();
+  const TRENCH_DEPTH = 1.8;
+  const TRENCH_FLOOR_Y = -TRENCH_DEPTH; // -1.8m
+  const TRENCH_WIDTH = 4.0; // from Z = -8.5 to -12.5
+  const TRENCH_LENGTH = 48.0; // from X = -24 to +24
+  const TRENCH_CENTER_Z = -10.5;
 
   // Sandbag generator helper
   function createSandbag(x, y, z, rotY = 0) {
@@ -316,89 +345,75 @@ export function createMilitaryRange(scene) {
     return wallGroup;
   }
 
-  // Builder for an individual trench segment
-  function addTrenchSegment(x1, z1, x2, z2, width = 2.4, depth = 1.5) {
-    const len = Math.hypot(x2 - x1, z2 - z1);
-    const midX = (x1 + x2) / 2;
-    const midZ = (z1 + z2) / 2;
-    const angle = Math.atan2(z2 - z1, x2 - x1);
+  // 1. Trench floor (duckboards / planks at Y = -1.8)
+  const trenchFloorGeo = new THREE.BoxGeometry(TRENCH_LENGTH, 0.2, TRENCH_WIDTH);
+  const trenchFloor = new THREE.Mesh(trenchFloorGeo, trenchWoodMaterial);
+  trenchFloor.position.set(0, TRENCH_FLOOR_Y + 0.1, TRENCH_CENTER_Z);
+  trenchFloor.receiveShadow = true;
+  trenchGroup.add(trenchFloor);
 
-    // Floor
-    const floorGeo = new THREE.BoxGeometry(len, 0.15, width);
-    const floor = new THREE.Mesh(floorGeo, trenchWoodMaterial);
-    floor.position.set(midX, -depth + 0.08, midZ);
-    floor.rotation.y = -angle;
-    floor.receiveShadow = true;
-    trenchGroup.add(floor);
+  // 2. South Retaining Wall (from Y = -1.8 up to ground level Y = 0)
+  const southWallGeo = new THREE.BoxGeometry(TRENCH_LENGTH, TRENCH_DEPTH, 0.25);
+  const southWall = new THREE.Mesh(southWallGeo, trenchWoodMaterial);
+  southWall.position.set(0, TRENCH_FLOOR_Y / 2, -8.4);
+  southWall.castShadow = true;
+  southWall.receiveShadow = true;
+  trenchGroup.add(southWall);
 
-    // Wall 1
-    const wallGeo = new THREE.BoxGeometry(len, depth, 0.2);
-    const perpX = Math.sin(angle) * (width / 2);
-    const perpZ = -Math.cos(angle) * (width / 2);
+  // 3. North Retaining Wall (from Y = -1.8 up to ground level Y = 0)
+  const northWallGeo = new THREE.BoxGeometry(TRENCH_LENGTH, TRENCH_DEPTH, 0.25);
+  const northWall = new THREE.Mesh(northWallGeo, trenchWoodMaterial);
+  northWall.position.set(0, TRENCH_FLOOR_Y / 2, -12.6);
+  northWall.castShadow = true;
+  northWall.receiveShadow = true;
+  trenchGroup.add(northWall);
 
-    const wall1 = new THREE.Mesh(wallGeo, trenchWoodMaterial);
-    wall1.position.set(midX + perpX, -depth / 2, midZ + perpZ);
-    wall1.rotation.y = -angle;
-    wall1.castShadow = true;
-    wall1.receiveShadow = true;
-    trenchGroup.add(wall1);
+  // 4. West and East End Caps
+  const endWallGeo = new THREE.BoxGeometry(0.25, TRENCH_DEPTH, TRENCH_WIDTH);
+  const westWall = new THREE.Mesh(endWallGeo, trenchWoodMaterial);
+  westWall.position.set(-24.1, TRENCH_FLOOR_Y / 2, TRENCH_CENTER_Z);
+  westWall.castShadow = true;
+  westWall.receiveShadow = true;
+  trenchGroup.add(westWall);
 
-    // Wall 2
-    const wall2 = new THREE.Mesh(wallGeo, trenchWoodMaterial);
-    wall2.position.set(midX - perpX, -depth / 2, midZ - perpZ);
-    wall2.rotation.y = -angle;
-    wall2.castShadow = true;
-    wall2.receiveShadow = true;
-    trenchGroup.add(wall2);
+  const eastWall = new THREE.Mesh(endWallGeo, trenchWoodMaterial);
+  eastWall.position.set(24.1, TRENCH_FLOOR_Y / 2, TRENCH_CENTER_Z);
+  eastWall.castShadow = true;
+  eastWall.receiveShadow = true;
+  trenchGroup.add(eastWall);
 
-    // Sandbags along top
-    trenchGroup.add(
-      createSandbagWall(
-        x1 + perpX,
-        z1 + perpZ,
-        x2 + perpX,
-        z2 + perpZ,
-        2
-      )
-    );
-    trenchGroup.add(
-      createSandbagWall(
-        x1 - perpX,
-        z1 - perpZ,
-        x2 - perpX,
-        z2 - perpZ,
-        2
-      )
-    );
-  }
+  // 5. Firing steps inside the trench (wooden ledge at Y = -1.1 along north wall)
+  const firingStepGeo = new THREE.BoxGeometry(TRENCH_LENGTH - 4, 0.65, 1.2);
+  const firingStep = new THREE.Mesh(firingStepGeo, trenchWoodMaterial);
+  firingStep.position.set(0, TRENCH_FLOOR_Y + 0.325, -11.9);
+  firingStep.castShadow = true;
+  firingStep.receiveShadow = true;
+  trenchGroup.add(firingStep);
 
-  // Wooden entrance ramp into trench
-  function addRamp(x, z, rotY, len = 4.2, width = 2.2, depth = 1.5) {
-    const rampGeo = new THREE.BoxGeometry(len, 0.15, width);
+  // 6. Sandbag Parapets along top edges at Y = 0
+  // Forward parapet facing shooting targets
+  trenchGroup.add(createSandbagWall(-24, -12.7, 24, -12.7, 3));
+  // Rear rim
+  trenchGroup.add(createSandbagWall(-24, -8.3, 24, -8.3, 2));
+
+  // 7. Wooden Entrance Ramps (smooth descent 1.8m down into trench)
+  function createEntranceRamp(x, startZ, endZ) {
+    const dz = endZ - startZ;
+    const rampLen = Math.hypot(dz, TRENCH_DEPTH);
+    const rampGeo = new THREE.BoxGeometry(2.4, 0.15, rampLen);
     const ramp = new THREE.Mesh(rampGeo, trenchWoodMaterial);
-    ramp.position.set(x, -depth / 2, z);
-    ramp.rotation.set(0, rotY, Math.atan2(depth, len));
+    const midZ = (startZ + endZ) / 2;
+    ramp.position.set(x, TRENCH_FLOOR_Y / 2, midZ);
+    ramp.rotation.x = Math.atan2(TRENCH_DEPTH, dz);
     ramp.receiveShadow = true;
+    ramp.castShadow = true;
     trenchGroup.add(ramp);
   }
 
-  // 1) FRONT CENTRAL TRENCH (running right in front of the player and firing counter)
-  addTrenchSegment(-18, -10, 18, -10, 2.4, 1.5);
-  // Center entry ramp leading into front trench from spawn
-  addRamp(0, -8.2, Math.PI / 2, 3.8);
-  // Side entries
-  addRamp(-18, -10, 0, 3.8);
-  addRamp(18, -10, Math.PI, 3.8);
-
-  // 2) LEFT FLANK TRENCH NETWORK
-  addTrenchSegment(-18, -10, -18, -42, 2.4, 1.5);
-  addTrenchSegment(-18, -25, -28, -25, 2.2, 1.5);
-  addRamp(-18, -43.8, -Math.PI / 2, 3.8);
-
-  // 3) RIGHT FLANK TRENCH
-  addTrenchSegment(18, -10, 18, -35, 2.4, 1.5);
-  addTrenchSegment(18, -22, 26, -22, 2.2, 1.5);
-  addRamp(18, -36.8, -Math.PI / 2, 3.8);
+  // 3 Wide descent ramps into the trench:
+  createEntranceRamp(0, -5.5, -9.5);     // Center ramp right ahead from spawn!
+  createEntranceRamp(-16, -5.5, -9.5);   // Left flank ramp
+  createEntranceRamp(16, -5.5, -9.5);    // Right flank ramp
 
   militaryWorld.add(trenchGroup);
 
